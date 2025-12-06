@@ -1,0 +1,40 @@
+body {
+  margin: 0;
+  background: rgba(30, 30, 30, 0.8);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: white;
+}
+
+#container {
+  padding: 15px 20px;
+}
+
+#input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 20px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+#results {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#results li {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#results li:hover,
+#results li.active {
+  background: rgba(255, 255, 255, 0.2);
+}

@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "Firefox Spotlight",
+    "version": "1.0",
+    "description": "A Spotlight-like search UI triggered by hotkey.",
+    "permissions": ["tabs", "activeTab", "windows", "storage"],
+    "background": {
+      "service_worker": "background.js",
+      "type": "module"
+    },
+    "commands": {
+      "toggle-spotlight": {
+        "suggested_key": {
+          "default": "Command+K",
+          "mac": "Command+K"
+        },
+        "description": "Open Spotlight-like window"
+      }
+    }
+  }
+  
