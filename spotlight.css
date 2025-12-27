@@ -1,59 +1,47 @@
 html {
   background-color: transparent !important;
+  background: transparent !important;
 }
 
 body {
   margin: 0;
-  background-color: transparent !important; /* double check */
+  background-color: transparent !important;
+  background: transparent !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: white;
   overflow: hidden;
 }
 
-#container {
-  background: rgba(30, 30, 30, 0.95); 
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  
-  display: flex;
-  flex-direction: column;
-  padding: 15px;
-  box-sizing: border-box;
-  
-  max-height: 580px; 
-}
-
-body {
-  margin: 0;
-  background: transparent; 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: white;
-  overflow: hidden; 
-}
 
 #container {
   background: rgba(30, 30, 30, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   
+
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   
-  max-height: 580px; 
   display: flex;
   flex-direction: column;
   padding: 15px;
   box-sizing: border-box;
+  
+  max-height: 580px; 
+}
 
-  border: 1px solid rgba(255, 255, 255, 0.1);
+
+#input-wrapper {
+  position: relative; 
+  width: 100%;
 }
 
 #input {
   width: 100%;
   padding: 12px 14px;
+  /* 右側預留空間給徽章，避免文字重疊 */
+  padding-right: 110px; 
   font-size: 18px;
   border-radius: 8px;
   border: none;
@@ -61,18 +49,63 @@ body {
   background: rgba(255, 255, 255, 0.15);
   color: white;
   box-sizing: border-box;
+  transition: box-shadow 0.2s;
+}
+
+#input:focus {
+  /* 聚焦時微微發光 */
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 #input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
+/* 4. 模式徽章 (Mode Badge) */
+#mode-badge {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  pointer-events: none; 
+  
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s;
+  color: white;
+}
+
+#mode-badge.show {
+  opacity: 1;
+}
+
+#mode-badge.mode-bookmark { background-color: #28a745; } 
+#mode-badge.mode-history  { background-color: #ffc107; color: black; } 
+#mode-badge.mode-search   { background-color: #007bff; } 
+
 #results {
   margin: 10px 0 0;
   padding: 0;
   list-style: none;
   overflow-y: auto;
-  flex: 1; 
+  flex: 1;
+  
+  scrollbar-width: thin; 
+  scrollbar-color: rgba(255,255,255,0.3) transparent;
+}
+
+#results::-webkit-scrollbar {
+  width: 6px;
+}
+#results::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
 }
 
 #results li {
@@ -85,6 +118,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: background 0.1s;
 }
 
 #results li:hover,
@@ -98,12 +132,16 @@ body {
   padding: 2px 6px;
   border-radius: 4px;
   margin-right: 10px;
-  font-size: 11px;
-  font-weight: bold;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  min-width: 35px;
+  text-align: center;
   flex-shrink: 0;
 }
 
-.tag-tab { background: #007bff; color: white; }
-.tag-book { background: #28a745; color: white; }
-.tag-hist { background: #ffc107; color: black; }
+
+.tag-tab    { background: #0d6efd; color: white; }
+.tag-book   { background: #198754; color: white; }
+.tag-hist   { background: #ffc107; color: black; }
 .tag-search { background: #6c757d; color: white; }

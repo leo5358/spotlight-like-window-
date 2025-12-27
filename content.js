@@ -16,26 +16,33 @@ function toggleOverlay() {
 
   iframe = document.createElement('iframe');
   
-  iframe.style.position = 'fixed';
-  iframe.style.top = '20%';
-  iframe.style.left = '50%';
-  iframe.style.transform = 'translate(-50%, 0)';
-  iframe.style.width = '700px';
-  iframe.style.height = '600px'; 
-  iframe.style.border = 'none';
-  iframe.style.zIndex = '2147483647';
-  iframe.style.borderRadius = '12px';
-  iframe.style.boxShadow = 'none'; 
-  
+  iframe.style.cssText = `
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 700px;
+    height: 600px;
+    border: none;
+    z-index: 2147483647; /* 確保在最上層 */
+    border-radius: 12px;
+    box-shadow: none; 
+    background: transparent !important; 
+    background-color: transparent !important;
+    color-scheme: none !important; /* 防止瀏覽器強制套用亮色主題背景 */
+    pointer-events: none; /* 預設不擋滑鼠，下面會開啟 */
+  `;
 
-  iframe.style.background = "transparent"; 
-  iframe.style.backgroundColor = "transparent"; 
-  iframe.allowTransparency = "true"; 
+  iframe.setAttribute("allowtransparency", "true");
 
   iframe.src = browser.runtime.getURL("spotlight.html");
 
+  iframe.onload = () => {
+    iframe.style.pointerEvents = "auto";
+    iframe.focus();
+  };
+
   document.body.appendChild(iframe);
-  iframe.focus();
 }
 
 function removeOverlay() {
