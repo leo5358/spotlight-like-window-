@@ -16,6 +16,8 @@ function toggleOverlay() {
 
   iframe = document.createElement('iframe');
   
+  // 修改說明：
+  // 將 color-scheme 改為 dark，讓瀏覽器準備深色渲染層，避免因 fallback 導致強制白底。
   iframe.style.cssText = `
     position: fixed;
     top: 20%;
@@ -29,7 +31,7 @@ function toggleOverlay() {
     box-shadow: none; 
     background: transparent !important; 
     background-color: transparent !important;
-    color-scheme: none !important; /* 防止瀏覽器強制套用亮色主題背景 */
+    color-scheme: dark !important; /* 已修正：從 none 改為 dark */
     pointer-events: none; /* 預設不擋滑鼠，下面會開啟 */
   `;
 

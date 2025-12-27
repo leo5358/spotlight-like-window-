@@ -1,3 +1,7 @@
+:root {
+  color-scheme: dark;
+}
+
 html {
   background-color: transparent !important;
   background: transparent !important;
@@ -12,12 +16,9 @@ body {
   overflow: hidden;
 }
 
-
 #container {
-  background: rgba(30, 30, 30, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  
+
+  background: rgba(30, 30, 30, 0.98); 
 
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -31,7 +32,6 @@ body {
   max-height: 580px; 
 }
 
-
 #input-wrapper {
   position: relative; 
   width: 100%;
@@ -40,7 +40,6 @@ body {
 #input {
   width: 100%;
   padding: 12px 14px;
-  /* 右側預留空間給徽章，避免文字重疊 */
   padding-right: 110px; 
   font-size: 18px;
   border-radius: 8px;
@@ -53,7 +52,6 @@ body {
 }
 
 #input:focus {
-  /* 聚焦時微微發光 */
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
@@ -61,7 +59,6 @@ body {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* 4. 模式徽章 (Mode Badge) */
 #mode-badge {
   position: absolute;
   right: 10px;
@@ -126,7 +123,6 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-
 .tag {
   display: inline-block;
   padding: 2px 6px;
@@ -139,7 +135,6 @@ body {
   text-align: center;
   flex-shrink: 0;
 }
-
 
 .tag-tab    { background: #0d6efd; color: white; }
 .tag-book   { background: #198754; color: white; }
