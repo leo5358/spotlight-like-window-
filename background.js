@@ -12,10 +12,49 @@ const RESTRICTED_DOMAINS = [
   "addons.mozilla.org"
 ];
 
+// TODO : fuzzy search 
+function calculateFuzzyScore(text, query) {
+  if (!text || !query) return 0;
+  const t = text.toLowerCase();
+  const q = query.toLowerCase();
+  
+
+  if (t.includes(q)) {
+    return 10000 - t.length; 
+  }
+  
+  let score = 0;
+  let qIdx = 0; // query index
+  let tIdx = 0; // text index
+  let prevMatchIdx = -1; // 上一次匹配的位置
+  
+  while (tIdx < t.length && qIdx < q.length) {
+    if (t[tIdx] === q[qIdx]) {
+      score += 10;
+      
+      if (prevMatchIdx !== -1 && tIdx === prevMatchIdx + 1) {
+        score += 40;
+      }
+      
+
+      const isWordStart = tIdx === 0 || /[^a-zA-Z0-9]/.test(t[tIdx - 1]);
+      if (isWordStart) {
+        score += 60;
+      }
+      
+      prevMatchIdx = tIdx;
+      qIdx++;
+    }
+    tIdx++;
+  }
+  
+  // 只有當 query 的每個字元都找到匹配時，才算成功
+  return (qIdx === q.length) ? score : 0;
+}
+// ------------------------------
 
 browser.commands.onCommand.addListener(async (cmd) => {
   if (cmd !== "toggle-spotlight") return;
-
 
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
 
@@ -47,7 +86,7 @@ async function toggleSpotlightWindow() {
   if (popupWindowId) {
     try {
       await browser.windows.remove(popupWindowId);
-    } catch (e) { /* 忽略錯誤 (視窗可能已被手動關閉) */ }
+    } catch (e) { /* 忽略錯誤 */ }
     popupWindowId = null;
   } else {
     const win = await browser.windows.create({
@@ -58,28 +97,22 @@ async function toggleSpotlightWindow() {
     });
     popupWindowId = win.id;
 
-
     browser.windows.onRemoved.addListener((id) => {
       if (id === popupWindowId) popupWindowId = null;
     });
   }
 }
 
-
-
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === "REQUEST_CLOSE") {
     if (popupWindowId) {
-
       browser.windows.remove(popupWindowId);
       popupWindowId = null;
     } else if (sender.tab && sender.tab.id) {
-
       browser.tabs.sendMessage(sender.tab.id, { action: "CLOSE_UI" });
     }
   }
   
-
   if (msg.action === "SEARCH_REQUEST") {
     handleSearch(msg.query).then(results => sendResponse({ results }));
     return true; 
@@ -91,9 +124,7 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 
-
 async function handleSearch(rawQuery) {
-
   const queryLower = rawQuery.toLowerCase();
   
   let results = [];
@@ -111,22 +142,45 @@ async function handleSearch(rawQuery) {
     keyword = rawQuery.substring(3).trim();
   }
 
+
   if (mode === "default") {
     const tabs = await browser.tabs.query({});
-    const q = keyword.toLowerCase();
     
-    tabs.forEach(t => {
-      if (t.title.toLowerCase().includes(q) || t.url.toLowerCase().includes(q)) {
-        results.push({ 
-          type: "tab", 
-          title: t.title, 
-          url: t.url, 
-          id: t.id, 
-          windowId: t.windowId 
+    if (keyword.length === 0) {
+        tabs.forEach(t => {
+             results.push({ 
+              type: "tab", 
+              title: t.title, 
+              url: t.url, 
+              id: t.id, 
+              windowId: t.windowId 
+            });
         });
-      }
-    });
+    } else {
+        const scoredTabs = tabs.map(t => {
+            const titleScore = calculateFuzzyScore(t.title, keyword);
+            const urlScore = calculateFuzzyScore(t.url, keyword);
+            return { 
+                tab: t, 
+                score: Math.max(titleScore, urlScore) 
+            };
+        });
+
+        scoredTabs
+            .filter(item => item.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .forEach(item => {
+                results.push({ 
+                  type: "tab", 
+                  title: item.tab.title, 
+                  url: item.tab.url, 
+                  id: item.tab.id, 
+                  windowId: item.tab.windowId 
+                });
+            });
+    }
   }
+  // ----------------------------------------------
 
   if (mode === "default" || mode === "bookmark") {
     if (keyword.length > 0) {
