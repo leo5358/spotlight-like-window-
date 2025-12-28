@@ -5,13 +5,13 @@
 ---
 
 <a name="english"></a>
-## 🇬🇧 English
+## English
 
 **Firefox Spotlight Hybrid** is a productivity extension that brings a macOS Spotlight-like command palette to Firefox. It allows you to quickly switch tabs, search bookmarks, access history, and perform web searches without leaving your keyboard.
 
 ### Key Features
 
-* ** Quick Launch**: Press `Command+Shift+9` (or custom shortcut) to open the search bar instantly.
+* **Quick Launch**: Press `Command+Shift+9` (or custom shortcut) to open the search bar instantly.
 * **Hybrid Display Engine**:
     * **Overlay Mode**: Injects a sleek, floating modal directly into the web page you are viewing.
     * **Popup Window Mode**: Automatically falls back to a standalone popup window on restricted pages (e.g., `about:config`, `addons.mozilla.org`) where content scripts are blocked.
@@ -55,7 +55,7 @@ This extension requires `<all_urls>` permission to inject the overlay UI into we
 
 ### 核心功能
 
-* ** 快速啟動**：按下 `Command+Shift+9`（或自訂快捷鍵）即可瞬間呼叫搜尋列。
+* **快速啟動**：按下 `Command+Shift+9`（或自訂快捷鍵）即可瞬間呼叫搜尋列。
 * **混合式顯示引擎 (Hybrid Engine)**：
     * **疊加層模式 (Overlay)**：在一般網頁上，搜尋框會以浮動視窗形式直接顯示在頁面中央，體驗流暢。
     * **獨立視窗模式 (Popup Window)**：在受限制的頁面（如 `about:config` 系統頁面或 Firefox 附加元件商店）無法注入腳本時，會自動切換為獨立彈出視窗，確保功能隨處可用。

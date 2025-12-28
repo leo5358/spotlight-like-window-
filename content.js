@@ -16,8 +16,7 @@ function toggleOverlay() {
 
   iframe = document.createElement('iframe');
   
-  // 修改說明：
-  // 將 color-scheme 改為 dark，讓瀏覽器準備深色渲染層，避免因 fallback 導致強制白底。
+
   iframe.style.cssText = `
     position: fixed;
     top: 20%;

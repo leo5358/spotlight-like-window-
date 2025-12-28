@@ -5,7 +5,18 @@ const modeBadge = document.querySelector("#mode-badge");
 let currentList = [];
 let selectedIndex = 0;
 
-input.addEventListener("input", async () => {
+function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+}
+
+
+const handleInput = debounce(async () => {
   const query = input.value;
   selectedIndex = 0;
   
@@ -25,7 +36,10 @@ input.addEventListener("input", async () => {
     currentList = response.results.slice(0, 15);
     renderList(currentList);
   }
-});
+}, 300);
+
+input.addEventListener("input", handleInput);
+
 
 function updateModeBadge(rawQuery) {
   const q = rawQuery.toLowerCase();
