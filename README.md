@@ -1,4 +1,4 @@
- # Firefox Spotlight Hybrid
+# Firefox Spotlight Hybrid
 
 [English](#english) | [繁體中文](#traditional-chinese)
 
@@ -25,8 +25,12 @@
 ### Usage
 
 1.  **Activate**: Press `Cmd+Shift+9` (Mac) or `Ctrl+Shift+9` (Windows/Linux).
-2.  **Navigate**: Use `Arrow Up` / `Arrow Down` to select results, and `Enter` to open.
-3.  **Search Modes** (Prefix commands):
+2.  **Navigate**: Use `Arrow Up` / `Arrow Down` to select results.
+3.  **Open**:
+    * **`Enter`**: Open in the **current tab** (or switch to the existing tab).
+    * **`Shift + Enter`**: Open result in a **new tab**.
+4.  **Search Modes** (Prefix commands):
+    * `%t [keyword]` : Search **Open Tabs** only.
     * `%b [keyword]` : Search **Bookmarks** only.
     * `%h [keyword]` : Search **History** only.
     * `%s [keyword]` : Force **Web Search**.
@@ -69,8 +73,12 @@ This extension requires `<all_urls>` permission to inject the overlay UI into we
 ### 使用說明
 
 1.  **啟動**：按下 `Cmd+Shift+9` (Mac) 或 `Ctrl+Shift+9` (Windows/Linux)。
-2.  **操作**：使用 `方向鍵 上/下` 選擇結果，按下 `Enter` 執行。
-3.  **搜尋模式** (前綴指令)：
+2.  **操作**：使用 `方向鍵 上/下` 選擇結果。
+3.  **執行**：
+    * **`Enter`**：在 **當前分頁** 開啟（若是已開啟的分頁則直接切換）。
+    * **`Shift + Enter`**：強制在 **新分頁** 開啟。
+4.  **搜尋模式** (前綴指令)：
+    * `%t [關鍵字]` : 僅搜尋 **已開啟分頁 (Tabs)**。
     * `%b [關鍵字]` : 僅搜尋 **書籤 (Bookmarks)**。
     * `%h [關鍵字]` : 僅搜尋 **歷史紀錄 (History)**。
     * `%s [關鍵字]` : 強制進行 **網頁搜尋**。
