@@ -48,7 +48,6 @@ function calculateFuzzyScore(text, query) {
     tIdx++;
   }
   
-  // 只有當 query 的每個字元都找到匹配時，才算成功
   return (qIdx === q.length) ? score : 0;
 }
 // ------------------------------
@@ -118,8 +117,9 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; 
   }
   
+  // [修改] 傳入 sender 與 openInNewTab
   if (msg.action === "EXECUTE_ITEM") {
-    executeItem(msg.item);
+    executeItem(msg.item, msg.openInNewTab, sender);
   }
 });
 
@@ -225,16 +225,46 @@ async function handleSearch(rawQuery) {
   return results;
 }
 
-
-function executeItem(item) {
+async function executeItem(item, openInNewTab, sender) {
   if (item.type === "tab") {
     browser.tabs.update(item.id, { active: true });
     if (item.windowId) {
       browser.windows.update(item.windowId, { focused: true }).catch(() => {});
     }
-  } else if (item.type === "bookmark" || item.type === "history") {
-    browser.tabs.create({ url: item.url });
-  } else if (item.type === "search") {
-    browser.search.search({ query: item.query, disposition: "NEW_TAB" });
+  } 
+  else if (item.type === "bookmark" || item.type === "history") {
+    if (openInNewTab) {
+      browser.tabs.create({ url: item.url });
+    } else {
+      let targetTabId = null;
+
+      const isPopupWindow = (popupWindowId && sender.tab && sender.tab.windowId === popupWindowId);
+
+      if (isPopupWindow) {
+
+        const wins = await browser.tabs.query({ active: true, windowType: 'normal', lastFocusedWindow: true });
+        if (wins.length > 0) {
+           targetTabId = wins[0].id;
+        } else {
+           const anyWins = await browser.tabs.query({ active: true, windowType: 'normal' });
+           if (anyWins.length > 0) targetTabId = anyWins[0].id;
+        }
+      } else {
+        if (sender.tab) targetTabId = sender.tab.id;
+      }
+
+      if (targetTabId) {
+        browser.tabs.update(targetTabId, { url: item.url });
+      } else {
+        browser.tabs.create({ url: item.url });
+      }
+    }
+  } 
+  
+  else if (item.type === "search") {
+    browser.search.search({ 
+      query: item.query, 
+      disposition: openInNewTab ? "NEW_TAB" : "CURRENT_TAB" 
+    });
   }
 }

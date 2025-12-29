@@ -79,15 +79,19 @@ function renderList(list) {
     li.appendChild(tag);
     li.appendChild(text);
 
-    li.addEventListener("click", () => triggerExecute(item));
+    li.addEventListener("click", (e) => triggerExecute(item, e.shiftKey));
     if (i === selectedIndex) li.classList.add("active");
     
     results.appendChild(li);
   });
 }
 
-function triggerExecute(item) {
-  browser.runtime.sendMessage({ action: "EXECUTE_ITEM", item: item });
+function triggerExecute(item, openInNewTab = false) {
+  browser.runtime.sendMessage({ 
+    action: "EXECUTE_ITEM", 
+    item: item,
+    openInNewTab: openInNewTab 
+  });
   closeSpotlight();
 }
 
@@ -106,7 +110,10 @@ document.addEventListener("keydown", (e) => {
     updateSelection();
     e.preventDefault();
   } else if (e.key === "Enter") {
-    if (currentList[selectedIndex]) triggerExecute(currentList[selectedIndex]);
+    if (currentList[selectedIndex]) {
+      // [修改] 偵測 Shift 鍵
+      triggerExecute(currentList[selectedIndex], e.shiftKey);
+    }
   } else if (e.key === "Escape") {
     closeSpotlight();
   }
