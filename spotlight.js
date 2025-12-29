@@ -47,7 +47,11 @@ function updateModeBadge(rawQuery) {
   modeBadge.className = "";
   modeBadge.textContent = "";
 
-  if (q.startsWith("%b ")) {
+  // [修改] 增加 Tab Mode 判斷
+  if (q.startsWith("%t ")) {
+    modeBadge.textContent = "Tab Mode";
+    modeBadge.classList.add("show", "mode-tab");
+  } else if (q.startsWith("%b ")) {
     modeBadge.textContent = "Bookmark Mode";
     modeBadge.classList.add("show", "mode-bookmark");
   } else if (q.startsWith("%h ")) {
@@ -111,7 +115,6 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
   } else if (e.key === "Enter") {
     if (currentList[selectedIndex]) {
-      // [修改] 偵測 Shift 鍵
       triggerExecute(currentList[selectedIndex], e.shiftKey);
     }
   } else if (e.key === "Escape") {

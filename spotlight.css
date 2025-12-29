@@ -17,9 +17,7 @@ body {
 }
 
 #container {
-
   background: rgba(30, 30, 30, 0.98); 
-
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -82,6 +80,8 @@ body {
   opacity: 1;
 }
 
+/* [新增] Tab Mode 樣式 */
+#mode-badge.mode-tab      { background-color: #0d6efd; } 
 #mode-badge.mode-bookmark { background-color: #28a745; } 
 #mode-badge.mode-history  { background-color: #ffc107; color: black; } 
 #mode-badge.mode-search   { background-color: #007bff; } 

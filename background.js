@@ -12,45 +12,37 @@ const RESTRICTED_DOMAINS = [
   "addons.mozilla.org"
 ];
 
-// TODO : fuzzy search 
 function calculateFuzzyScore(text, query) {
   if (!text || !query) return 0;
   const t = text.toLowerCase();
   const q = query.toLowerCase();
   
-
   if (t.includes(q)) {
     return 10000 - t.length; 
   }
   
   let score = 0;
-  let qIdx = 0; // query index
-  let tIdx = 0; // text index
-  let prevMatchIdx = -1; // 上一次匹配的位置
+  let qIdx = 0; 
+  let tIdx = 0; 
+  let prevMatchIdx = -1; 
   
   while (tIdx < t.length && qIdx < q.length) {
     if (t[tIdx] === q[qIdx]) {
       score += 10;
-      
       if (prevMatchIdx !== -1 && tIdx === prevMatchIdx + 1) {
         score += 40;
       }
-      
-
       const isWordStart = tIdx === 0 || /[^a-zA-Z0-9]/.test(t[tIdx - 1]);
       if (isWordStart) {
         score += 60;
       }
-      
       prevMatchIdx = tIdx;
       qIdx++;
     }
     tIdx++;
   }
-  
   return (qIdx === q.length) ? score : 0;
 }
-// ------------------------------
 
 browser.commands.onCommand.addListener(async (cmd) => {
   if (cmd !== "toggle-spotlight") return;
@@ -65,7 +57,6 @@ browser.commands.onCommand.addListener(async (cmd) => {
     toggleSpotlightOverlay(tab.id);
   }
 });
-
 
 async function toggleSpotlightOverlay(tabId) {
   try {
@@ -117,7 +108,6 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; 
   }
   
-  // [修改] 傳入 sender 與 openInNewTab
   if (msg.action === "EXECUTE_ITEM") {
     executeItem(msg.item, msg.openInNewTab, sender);
   }
@@ -131,7 +121,11 @@ async function handleSearch(rawQuery) {
   let mode = "default"; 
   let keyword = rawQuery.trim(); 
 
-  if (queryLower.startsWith("%b ")) { 
+  // [修改] 增加 Tab Mode 判斷
+  if (queryLower.startsWith("%t ")) {
+    mode = "tab";
+    keyword = rawQuery.substring(3).trim();
+  } else if (queryLower.startsWith("%b ")) { 
     mode = "bookmark"; 
     keyword = rawQuery.substring(3).trim(); 
   } else if (queryLower.startsWith("%h ")) { 
@@ -142,8 +136,7 @@ async function handleSearch(rawQuery) {
     keyword = rawQuery.substring(3).trim();
   }
 
-
-  if (mode === "default") {
+  if (mode === "default" || mode === "tab") {
     const tabs = await browser.tabs.query({});
     
     if (keyword.length === 0) {
@@ -180,7 +173,6 @@ async function handleSearch(rawQuery) {
             });
     }
   }
-  // ----------------------------------------------
 
   if (mode === "default" || mode === "bookmark") {
     if (keyword.length > 0) {
@@ -225,23 +217,21 @@ async function handleSearch(rawQuery) {
   return results;
 }
 
+
 async function executeItem(item, openInNewTab, sender) {
   if (item.type === "tab") {
     browser.tabs.update(item.id, { active: true });
     if (item.windowId) {
       browser.windows.update(item.windowId, { focused: true }).catch(() => {});
     }
-  } 
-  else if (item.type === "bookmark" || item.type === "history") {
+  } else if (item.type === "bookmark" || item.type === "history") {
     if (openInNewTab) {
       browser.tabs.create({ url: item.url });
     } else {
       let targetTabId = null;
-
       const isPopupWindow = (popupWindowId && sender.tab && sender.tab.windowId === popupWindowId);
 
       if (isPopupWindow) {
-
         const wins = await browser.tabs.query({ active: true, windowType: 'normal', lastFocusedWindow: true });
         if (wins.length > 0) {
            targetTabId = wins[0].id;
@@ -259,9 +249,7 @@ async function executeItem(item, openInNewTab, sender) {
         browser.tabs.create({ url: item.url });
       }
     }
-  } 
-  
-  else if (item.type === "search") {
+  } else if (item.type === "search") {
     browser.search.search({ 
       query: item.query, 
       disposition: openInNewTab ? "NEW_TAB" : "CURRENT_TAB" 
