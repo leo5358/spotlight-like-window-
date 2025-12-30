@@ -1,5 +1,9 @@
 let iframe = null;
 
+function handleOutsideClick(e) {
+  removeOverlay();
+}
+
 browser.runtime.onMessage.addListener((message) => {
   if (message.action === "TOGGLE_UI") {
     toggleOverlay();
@@ -16,7 +20,6 @@ function toggleOverlay() {
 
   iframe = document.createElement('iframe');
   
-
   iframe.style.cssText = `
     position: fixed;
     top: 20%;
@@ -30,17 +33,20 @@ function toggleOverlay() {
     box-shadow: none; 
     background: transparent !important; 
     background-color: transparent !important;
-    color-scheme: dark !important; /* 已修正：從 none 改為 dark */
-    pointer-events: none; /* 預設不擋滑鼠，下面會開啟 */
+    color-scheme: dark !important; 
+    pointer-events: none; /* 預設不擋滑鼠 */
   `;
 
   iframe.setAttribute("allowtransparency", "true");
-
   iframe.src = browser.runtime.getURL("spotlight.html");
 
   iframe.onload = () => {
     iframe.style.pointerEvents = "auto";
     iframe.focus();
+    
+    setTimeout(() => {
+      document.addEventListener("click", handleOutsideClick);
+    }, 100);
   };
 
   document.body.appendChild(iframe);
@@ -48,6 +54,8 @@ function toggleOverlay() {
 
 function removeOverlay() {
   if (iframe) {
+    document.removeEventListener("click", handleOutsideClick);
+    
     iframe.remove();
     iframe = null;
   }
