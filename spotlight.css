@@ -33,7 +33,39 @@ body {
 #input-wrapper {
   position: relative; 
   width: 100%;
+  display: flex;
+  align-items: center;
 }
+
+#prefix-indicator {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: white;
+  pointer-events: none;
+  
+  display: none;
+  opacity: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+#prefix-indicator.show {
+  display: block;
+  opacity: 1;
+}
+
+#prefix-indicator.mode-tab      { background-color: #0d6efd; } 
+#prefix-indicator.mode-bookmark { background-color: #28a745; } 
+#prefix-indicator.mode-history  { background-color: #ffc107; color: black; } 
+#prefix-indicator.mode-search   { background-color: #007bff; } 
 
 #input {
   width: 100%;
@@ -46,7 +78,11 @@ body {
   background: rgba(255, 255, 255, 0.15);
   color: white;
   box-sizing: border-box;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, padding-left 0.2s ease;
+}
+
+#input.has-mode {
+  padding-left: 90px;
 }
 
 #input:focus {

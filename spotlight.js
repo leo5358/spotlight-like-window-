@@ -1,9 +1,11 @@
 const input = document.querySelector("#input");
 const results = document.querySelector("#results");
-const modeBadge = document.querySelector("#mode-badge"); 
+const modeBadge = document.querySelector("#mode-badge");
+const prefixIndicator = document.querySelector("#prefix-indicator");
 
 let currentList = [];
 let selectedIndex = 0;
+let currentModePrefix = "";
 
 function debounce(func, delay) {
   let timeoutId;
@@ -15,11 +17,95 @@ function debounce(func, delay) {
   };
 }
 
-const handleInput = debounce(async () => {
-  const query = input.value;
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Backspace" && input.value === "" && currentModePrefix !== "") {
+    e.preventDefault();
+    input.value = currentModePrefix;
+    currentModePrefix = "";
+    updateUI();
+  }
+
+  if (e.key === "ArrowDown") {
+    selectedIndex = (selectedIndex + 1) % currentList.length;
+    updateSelection();
+    e.preventDefault();
+  } else if (e.key === "ArrowUp") {
+    selectedIndex = (selectedIndex - 1 + currentList.length) % currentList.length;
+    updateSelection();
+    e.preventDefault();
+  } else if (e.key === "Enter") {
+    if (currentList[selectedIndex]) {
+      triggerExecute(currentList[selectedIndex], e.shiftKey);
+    }
+  } else if (e.key === "Escape") {
+    closeSpotlight();
+  }
+});
+
+input.addEventListener("input", (e) => {
+  const val = input.value;
+
+  if (currentModePrefix === "") {
+    if (val === "%t " || val === "%b " || val === "%h " || val === "%s ") {
+      currentModePrefix = val;
+      input.value = "";
+      updateUI();
+      renderList([]);
+      return;
+    }
+  }
+
+  handleSearch();
+});
+
+function updateUI() {
+  modeBadge.className = "";
+  modeBadge.textContent = "";
+  prefixIndicator.className = "";
+  prefixIndicator.textContent = "";
+  input.classList.remove("has-mode");
+
+  if (currentModePrefix === "") {
+    input.placeholder = "Search or type a URL…";
+  } else {
+    input.classList.add("has-mode");
+    
+    let badgeText = "";
+    let badgeClass = "";
+    let placeholderText = "";
+
+    switch (currentModePrefix) {
+      case "%t ":
+        badgeText = "Tabs";
+        badgeClass = "mode-tab";
+        placeholderText = "Search open tabs…";
+        break;
+      case "%b ":
+        badgeText = "Bookmarks";
+        badgeClass = "mode-bookmark";
+        placeholderText = "Search bookmarks…";
+        break;
+      case "%h ":
+        badgeText = "History";
+        badgeClass = "mode-history";
+        placeholderText = "Search history…";
+        break;
+      case "%s ":
+        badgeText = "Web";
+        badgeClass = "mode-search";
+        placeholderText = "Google search…";
+        break;
+    }
+
+    prefixIndicator.textContent = badgeText;
+    prefixIndicator.classList.add("show", badgeClass);
+    input.placeholder = placeholderText;
+  }
+}
+
+const handleSearch = debounce(async () => {
+  const query = currentModePrefix + input.value;
   selectedIndex = 0;
-  
-  updateModeBadge(query);
 
   if (!query.trim()) {
     renderList([]);
@@ -36,29 +122,6 @@ const handleInput = debounce(async () => {
     renderList(currentList);
   }
 }, 300);
-
-input.addEventListener("input", handleInput);
-
-function updateModeBadge(rawQuery) {
-  const q = rawQuery.toLowerCase();
-  
-  modeBadge.className = "";
-  modeBadge.textContent = "";
-
-  if (q.startsWith("%t ")) {
-    modeBadge.textContent = "Tab Mode";
-    modeBadge.classList.add("show", "mode-tab");
-  } else if (q.startsWith("%b ")) {
-    modeBadge.textContent = "Bookmark Mode";
-    modeBadge.classList.add("show", "mode-bookmark");
-  } else if (q.startsWith("%h ")) {
-    modeBadge.textContent = "History Mode";
-    modeBadge.classList.add("show", "mode-history");
-  } else if (q.startsWith("%s ")) {
-    modeBadge.textContent = "Web Search";
-    modeBadge.classList.add("show", "mode-search");
-  }
-}
 
 function getFaviconSource(item) {
   if (item.type === "search") {
@@ -126,36 +189,6 @@ function closeSpotlight() {
   window.close();
 }
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowDown") {
-    selectedIndex = (selectedIndex + 1) % currentList.length;
-    updateSelection();
-    e.preventDefault();
-  } else if (e.key === "ArrowUp") {
-    selectedIndex = (selectedIndex - 1 + currentList.length) % currentList.length;
-    updateSelection();
-    e.preventDefault();
-  } else if (e.key === "Enter") {
-    if (currentList[selectedIndex]) {
-      triggerExecute(currentList[selectedIndex], e.shiftKey);
-    }
-  } else if (e.key === "Escape") {
-    closeSpotlight();
-  }
-});
-
-function updateSelection() {
-  const items = results.querySelectorAll("li");
-  items.forEach((item, i) => {
-    if (i === selectedIndex) {
-      item.classList.add("active");
-      item.scrollIntoView({ block: "nearest" });
-    } else {
-      item.classList.remove("active");
-    }
-  });
-}
-
 document.addEventListener("click", (e) => {
   const container = document.getElementById("container");
   if (container && !container.contains(e.target)) {
@@ -168,7 +201,17 @@ function ensureFocus() {
     input.focus();
   }, 10);
 }
-
 window.addEventListener("focus", ensureFocus);
-
 ensureFocus();
+
+function updateSelection() {
+  const items = results.querySelectorAll("li");
+  items.forEach((item, i) => {
+    if (i === selectedIndex) {
+      item.classList.add("active");
+      item.scrollIntoView({ block: "nearest" });
+    } else {
+      item.classList.remove("active");
+    }
+  });
+}
