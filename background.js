@@ -1,3 +1,5 @@
+import Fuse from './fuse.esm.js';
+
 let popupWindowId = null;
 
 const RESTRICTED_PROTOCOLS = [
@@ -12,38 +14,7 @@ const RESTRICTED_DOMAINS = [
   "addons.mozilla.org"
 ];
 
-function calculateFuzzyScore(text, query) {
-  if (!text || !query) return 0;
-  const t = text.toLowerCase();
-  const q = query.toLowerCase();
-  
-  if (t.includes(q)) {
-    return 10000 - t.length; 
-  }
-  
-  let score = 0;
-  let qIdx = 0; 
-  let tIdx = 0; 
-  let prevMatchIdx = -1; 
-  
-  while (tIdx < t.length && qIdx < q.length) {
-    if (t[tIdx] === q[qIdx]) {
-      score += 10;
-      if (prevMatchIdx !== -1 && tIdx === prevMatchIdx + 1) {
-        score += 40;
-      }
-      const isWordStart = tIdx === 0 || /[^a-zA-Z0-9]/.test(t[tIdx - 1]);
-      if (isWordStart) {
-        score += 60;
-      }
-      prevMatchIdx = tIdx;
-      qIdx++;
-    }
-    tIdx++;
-  }
-  return (qIdx === q.length) ? score : 0;
-}
-
+// 監聽快捷鍵指令
 browser.commands.onCommand.addListener(async (cmd) => {
   if (cmd !== "toggle-spotlight") return;
 
@@ -104,6 +75,7 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   
   if (msg.action === "SEARCH_REQUEST") {
+    // 必須 return true 以支援非同步 sendResponse
     handleSearch(msg.query).then(results => sendResponse({ results }));
     return true; 
   }
@@ -121,7 +93,7 @@ async function handleSearch(rawQuery) {
   let mode = "default"; 
   let keyword = rawQuery.trim(); 
 
-  // [修改] 增加 Tab Mode 判斷
+  // 判斷搜尋模式前綴
   if (queryLower.startsWith("%t ")) {
     mode = "tab";
     keyword = rawQuery.substring(3).trim();
@@ -136,10 +108,12 @@ async function handleSearch(rawQuery) {
     keyword = rawQuery.substring(3).trim();
   }
 
+  // --- 分頁搜尋 (Tabs) - 使用 Fuse.js ---
   if (mode === "default" || mode === "tab") {
     const tabs = await browser.tabs.query({});
     
     if (keyword.length === 0) {
+        // 如果沒有關鍵字，列出所有分頁
         tabs.forEach(t => {
              results.push({ 
               type: "tab", 
@@ -150,30 +124,36 @@ async function handleSearch(rawQuery) {
             });
         });
     } else {
-        const scoredTabs = tabs.map(t => {
-            const titleScore = calculateFuzzyScore(t.title, keyword);
-            const urlScore = calculateFuzzyScore(t.url, keyword);
-            return { 
-                tab: t, 
-                score: Math.max(titleScore, urlScore) 
-            };
-        });
+        // 設定 Fuse.js 選項
+        const options = {
+          includeScore: true,
+          // 搜尋欄位與權重：標題比網址更重要
+          keys: [
+            { name: 'title', weight: 0.7 },
+            { name: 'url', weight: 0.3 }
+          ],
+          threshold: 0.4, // 模糊門檻：越低越嚴格 (0.0 完全匹配, 1.0 非常寬鬆)
+          ignoreLocation: true // 忽略匹配位置 (不需要從字串開頭開始匹配)
+        };
 
-        scoredTabs
-            .filter(item => item.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .forEach(item => {
-                results.push({ 
-                  type: "tab", 
-                  title: item.tab.title, 
-                  url: item.tab.url, 
-                  id: item.tab.id, 
-                  windowId: item.tab.windowId 
-                });
-            });
+        const fuse = new Fuse(tabs, options);
+        const fuseResults = fuse.search(keyword);
+
+        // 將 Fuse 結果轉換回原本的格式
+        fuseResults.forEach(res => {
+          results.push({
+            type: "tab",
+            title: res.item.title,
+            url: res.item.url,
+            id: res.item.id,
+            windowId: res.item.windowId
+            // 如果未來需要高亮功能，可以使用 res.matches
+          });
+        });
     }
   }
 
+  // --- 書籤搜尋 (Bookmarks) - 維持原生 API ---
   if (mode === "default" || mode === "bookmark") {
     if (keyword.length > 0) {
       const bookmarks = await browser.bookmarks.search({ query: keyword });
@@ -188,6 +168,7 @@ async function handleSearch(rawQuery) {
     }
   }
   
+  // --- 歷史紀錄搜尋 (History) - 維持原生 API ---
   if (mode === "history") {
      if (keyword.length > 0) {
          const history = await browser.history.search({ 
@@ -206,6 +187,7 @@ async function handleSearch(rawQuery) {
      }
   }
 
+  // --- 網頁搜尋 (Web Search) ---
   if (keyword.length > 0) {
       results.push({ 
         type: "search", 
@@ -232,6 +214,7 @@ async function executeItem(item, openInNewTab, sender) {
       const isPopupWindow = (popupWindowId && sender.tab && sender.tab.windowId === popupWindowId);
 
       if (isPopupWindow) {
+        // 如果是在 Popup 視窗中點擊，嘗試找一個正常的視窗來開啟
         const wins = await browser.tabs.query({ active: true, windowType: 'normal', lastFocusedWindow: true });
         if (wins.length > 0) {
            targetTabId = wins[0].id;
@@ -240,6 +223,7 @@ async function executeItem(item, openInNewTab, sender) {
            if (anyWins.length > 0) targetTabId = anyWins[0].id;
         }
       } else {
+        // 如果是在 Overlay 中點擊，直接使用當前分頁
         if (sender.tab) targetTabId = sender.tab.id;
       }
 
