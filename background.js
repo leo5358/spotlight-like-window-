@@ -1,28 +1,38 @@
-import Fuse from './fuse.esm.js';
+import Fuse from './fuse.esm.js'; // 記得保留這行
 
 let popupWindowId = null;
 
-const RESTRICTED_PROTOCOLS = [
-  "about:",
-  "chrome:",
-  "edge:",
-  "moz-extension:",
-  "view-source:"
-];
+// [新增] 全域設定變數 (預設值)
+let settings = {
+  prefixes: {
+    tab: "%t",
+    bookmark: "%b",
+    history: "%h",
+    search: "%s"
+  }
+};
 
-const RESTRICTED_DOMAINS = [
-  "addons.mozilla.org"
-];
+// [新增] 初始化設定並監聽變更
+function loadSettings() {
+  browser.storage.sync.get(settings).then((res) => {
+    if (res.prefixes) settings.prefixes = res.prefixes;
+  });
+}
+loadSettings();
 
-// 監聽快捷鍵指令
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area === "sync" && changes.prefixes) {
+    settings.prefixes = changes.prefixes.newValue;
+  }
+});
+
+const RESTRICTED_PROTOCOLS = [ "about:", "chrome:", "edge:", "moz-extension:", "view-source:" ];
+const RESTRICTED_DOMAINS = [ "addons.mozilla.org" ];
+
 browser.commands.onCommand.addListener(async (cmd) => {
   if (cmd !== "toggle-spotlight") return;
-
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-
-  if (!tab || !tab.url || 
-      RESTRICTED_PROTOCOLS.some(p => tab.url.startsWith(p)) || 
-      RESTRICTED_DOMAINS.some(d => tab.url.includes(d))) {
+  if (!tab || !tab.url || RESTRICTED_PROTOCOLS.some(p => tab.url.startsWith(p)) || RESTRICTED_DOMAINS.some(d => tab.url.includes(d))) {
     toggleSpotlightWindow();
   } else {
     toggleSpotlightOverlay(tab.id);
@@ -31,36 +41,21 @@ browser.commands.onCommand.addListener(async (cmd) => {
 
 async function toggleSpotlightOverlay(tabId) {
   try {
-    await browser.scripting.executeScript({
-      target: { tabId: tabId },
-      files: ["content.js"]
-    });
-
+    await browser.scripting.executeScript({ target: { tabId: tabId }, files: ["content.js"] });
     browser.tabs.sendMessage(tabId, { action: "TOGGLE_UI" });
   } catch (err) {
-    console.warn("Injection failed, falling back to window:", err);
     toggleSpotlightWindow();
   }
 }
 
 async function toggleSpotlightWindow() {
   if (popupWindowId) {
-    try {
-      await browser.windows.remove(popupWindowId);
-    } catch (e) { /* 忽略錯誤 */ }
+    try { await browser.windows.remove(popupWindowId); } catch (e) {}
     popupWindowId = null;
   } else {
-    const win = await browser.windows.create({
-      url: "spotlight.html",
-      type: "popup",
-      width: 700,
-      height: 600
-    });
+    const win = await browser.windows.create({ url: "spotlight.html", type: "popup", width: 700, height: 600 });
     popupWindowId = win.id;
-
-    browser.windows.onRemoved.addListener((id) => {
-      if (id === popupWindowId) popupWindowId = null;
-    });
+    browser.windows.onRemoved.addListener((id) => { if (id === popupWindowId) popupWindowId = null; });
   }
 }
 
@@ -73,170 +68,110 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       browser.tabs.sendMessage(sender.tab.id, { action: "CLOSE_UI" });
     }
   }
-  
   if (msg.action === "SEARCH_REQUEST") {
-    // 必須 return true 以支援非同步 sendResponse
     handleSearch(msg.query).then(results => sendResponse({ results }));
     return true; 
   }
-  
   if (msg.action === "EXECUTE_ITEM") {
     executeItem(msg.item, msg.openInNewTab, sender);
   }
 });
 
-
 async function handleSearch(rawQuery) {
   const queryLower = rawQuery.toLowerCase();
-  
   let results = [];
   let mode = "default"; 
   let keyword = rawQuery.trim(); 
 
-  // 判斷搜尋模式前綴
-  if (queryLower.startsWith("%t ")) {
+  // [修改] 使用 settings 變數進行判斷
+  // 注意：這裡假設使用者設定的前綴最後可能帶有空白，我們需要靈活處理
+  // 為了簡化，我們假設前綴與關鍵字間有空格
+  
+  const p = settings.prefixes;
+
+  // 輔助函式：檢查是否以該前綴開頭 (不分大小寫)
+  const checkPrefix = (prefix) => queryLower.startsWith(prefix.toLowerCase() + " ");
+
+  if (checkPrefix(p.tab)) {
     mode = "tab";
-    keyword = rawQuery.substring(3).trim();
-  } else if (queryLower.startsWith("%b ")) { 
+    keyword = rawQuery.substring(p.tab.length + 1).trim();
+  } else if (checkPrefix(p.bookmark)) { 
     mode = "bookmark"; 
-    keyword = rawQuery.substring(3).trim(); 
-  } else if (queryLower.startsWith("%h ")) { 
+    keyword = rawQuery.substring(p.bookmark.length + 1).trim(); 
+  } else if (checkPrefix(p.history)) { 
     mode = "history"; 
-    keyword = rawQuery.substring(3).trim(); 
-  } else if (queryLower.startsWith("%s ")) { 
+    keyword = rawQuery.substring(p.history.length + 1).trim(); 
+  } else if (checkPrefix(p.search)) { 
     mode = "search"; 
-    keyword = rawQuery.substring(3).trim();
+    keyword = rawQuery.substring(p.search.length + 1).trim();
   }
 
-  // --- 分頁搜尋 (Tabs) - 使用 Fuse.js ---
+  // --- 分頁搜尋 (使用 Fuse.js) ---
   if (mode === "default" || mode === "tab") {
     const tabs = await browser.tabs.query({});
-    
     if (keyword.length === 0) {
-        // 如果沒有關鍵字，列出所有分頁
         tabs.forEach(t => {
-             results.push({ 
-              type: "tab", 
-              title: t.title, 
-              url: t.url, 
-              id: t.id, 
-              windowId: t.windowId 
-            });
+             results.push({ type: "tab", title: t.title, url: t.url, id: t.id, windowId: t.windowId });
         });
     } else {
-        // 設定 Fuse.js 選項
         const options = {
           includeScore: true,
-          // 搜尋欄位與權重：標題比網址更重要
-          keys: [
-            { name: 'title', weight: 0.7 },
-            { name: 'url', weight: 0.3 }
-          ],
-          threshold: 0.4, // 模糊門檻：越低越嚴格 (0.0 完全匹配, 1.0 非常寬鬆)
-          ignoreLocation: true // 忽略匹配位置 (不需要從字串開頭開始匹配)
+          keys: [{ name: 'title', weight: 0.7 }, { name: 'url', weight: 0.3 }],
+          threshold: 0.4,
+          ignoreLocation: true 
         };
-
         const fuse = new Fuse(tabs, options);
-        const fuseResults = fuse.search(keyword);
-
-        // 將 Fuse 結果轉換回原本的格式
-        fuseResults.forEach(res => {
-          results.push({
-            type: "tab",
-            title: res.item.title,
-            url: res.item.url,
-            id: res.item.id,
-            windowId: res.item.windowId
-            // 如果未來需要高亮功能，可以使用 res.matches
-          });
+        fuse.search(keyword).forEach(res => {
+          results.push({ type: "tab", title: res.item.title, url: res.item.url, id: res.item.id, windowId: res.item.windowId });
         });
     }
   }
 
-  // --- 書籤搜尋 (Bookmarks) - 維持原生 API ---
+  // --- 書籤與歷史紀錄 (維持原生) ---
   if (mode === "default" || mode === "bookmark") {
     if (keyword.length > 0) {
       const bookmarks = await browser.bookmarks.search({ query: keyword });
-
       bookmarks.filter(b => b.url).forEach(b => {
-        results.push({ 
-          type: "bookmark", 
-          title: b.title, 
-          url: b.url 
-        });
+        results.push({ type: "bookmark", title: b.title, url: b.url });
       });
     }
   }
   
-  // --- 歷史紀錄搜尋 (History) - 維持原生 API ---
   if (mode === "history") {
      if (keyword.length > 0) {
-         const history = await browser.history.search({ 
-           text: keyword, 
-           maxResults: 15, 
-           startTime: 0 
-         });
-         
+         const history = await browser.history.search({ text: keyword, maxResults: 15, startTime: 0 });
          history.forEach(h => {
-           results.push({ 
-             type: "history", 
-             title: h.title || h.url, 
-             url: h.url 
-           });
+           results.push({ type: "history", title: h.title || h.url, url: h.url });
          });
      }
   }
 
-  // --- 網頁搜尋 (Web Search) ---
   if (keyword.length > 0) {
-      results.push({ 
-        type: "search", 
-        title: `Search Web for "${keyword}"`, 
-        query: keyword 
-      });
+      results.push({ type: "search", title: `Search Web for "${keyword}"`, query: keyword });
   }
 
   return results;
 }
 
-
+// executeItem 函式維持不變
 async function executeItem(item, openInNewTab, sender) {
-  if (item.type === "tab") {
-    browser.tabs.update(item.id, { active: true });
-    if (item.windowId) {
-      browser.windows.update(item.windowId, { focused: true }).catch(() => {});
-    }
-  } else if (item.type === "bookmark" || item.type === "history") {
-    if (openInNewTab) {
-      browser.tabs.create({ url: item.url });
-    } else {
-      let targetTabId = null;
-      const isPopupWindow = (popupWindowId && sender.tab && sender.tab.windowId === popupWindowId);
-
-      if (isPopupWindow) {
-        // 如果是在 Popup 視窗中點擊，嘗試找一個正常的視窗來開啟
-        const wins = await browser.tabs.query({ active: true, windowType: 'normal', lastFocusedWindow: true });
-        if (wins.length > 0) {
-           targetTabId = wins[0].id;
-        } else {
-           const anyWins = await browser.tabs.query({ active: true, windowType: 'normal' });
-           if (anyWins.length > 0) targetTabId = anyWins[0].id;
-        }
-      } else {
-        // 如果是在 Overlay 中點擊，直接使用當前分頁
-        if (sender.tab) targetTabId = sender.tab.id;
+    if (item.type === "tab") {
+      browser.tabs.update(item.id, { active: true });
+      if (item.windowId) browser.windows.update(item.windowId, { focused: true }).catch(() => {});
+    } else if (item.type === "bookmark" || item.type === "history") {
+      if (openInNewTab) browser.tabs.create({ url: item.url });
+      else {
+        let targetTabId = null;
+        const isPopupWindow = (popupWindowId && sender.tab && sender.tab.windowId === popupWindowId);
+        if (isPopupWindow) {
+          const wins = await browser.tabs.query({ active: true, windowType: 'normal', lastFocusedWindow: true });
+          if (wins.length > 0) targetTabId = wins[0].id;
+          else { const anyWins = await browser.tabs.query({ active: true, windowType: 'normal' }); if (anyWins.length > 0) targetTabId = anyWins[0].id; }
+        } else { if (sender.tab) targetTabId = sender.tab.id; }
+        if (targetTabId) browser.tabs.update(targetTabId, { url: item.url });
+        else browser.tabs.create({ url: item.url });
       }
-
-      if (targetTabId) {
-        browser.tabs.update(targetTabId, { url: item.url });
-      } else {
-        browser.tabs.create({ url: item.url });
-      }
+    } else if (item.type === "search") {
+      browser.search.search({ query: item.query, disposition: openInNewTab ? "NEW_TAB" : "CURRENT_TAB" });
     }
-  } else if (item.type === "search") {
-    browser.search.search({ 
-      query: item.query, 
-      disposition: openInNewTab ? "NEW_TAB" : "CURRENT_TAB" 
-    });
-  }
 }
