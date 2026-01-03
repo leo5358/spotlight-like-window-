@@ -176,6 +176,17 @@ body {
 .tag-hist   { background: #ffc107; color: black; }
 .tag-search { background: #6c757d; color: white; }
 
+.tag-custom { 
+  background: #58D667; 
+  color: black;
+}
+
+#prefix-indicator.mode-custom,
+#mode-badge.mode-custom {
+  background-color: #58D667;
+  color: black;
+}
+
 .favicon {
   width: 18px;
   height: 18px;
