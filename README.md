@@ -21,6 +21,7 @@
     * **Bookmarks**: Search your saved bookmarks.
     * **History**: Retrieve recently visited pages.
     * **Web Search**: Default fallback to web search.
+* Custom Search Engines: Define your own shortcuts (e.g., @wiki for Wikipedia) to search specific sites directly.
 
 ### Usage
 
@@ -35,6 +36,11 @@
     * `%h [keyword]` : Search **History** only.
     * `%s [keyword]` : Force **Web Search**.
     * *(No prefix)* : Search everything (Open Tabs + Bookmarks + Web).
+
+### Configuration
+Access the **Settings** page to:
+    Customize the default prefixes for Tabs, Bookmarks, and History.
+    Add custom search engines by defining a name, prefix, and a URL with a `%s` placeholder.
 
 ### Installation (Developer Mode)
 
@@ -69,6 +75,7 @@ This extension requires `<all_urls>` permission to inject the overlay UI into we
     * **書籤搜尋**：即時檢索你的收藏內容。
     * **歷史紀錄**：找回最近瀏覽過的網站。
     * **網頁搜尋**：直接透過預設引擎搜尋網路。
+* 自訂搜尋引擎：您可以自由設定快捷前綴（例如輸入 @wiki ），直接搜尋特定網站。
 
 ### 使用說明
 
@@ -83,6 +90,11 @@ This extension requires `<all_urls>` permission to inject the overlay UI into we
     * `%h [關鍵字]` : 僅搜尋 **歷史紀錄 (History)**。
     * `%s [關鍵字]` : 強制進行 **網頁搜尋**。
     * *(無前綴)* : 綜合搜尋 (已開啟分頁 + 書籤 + 網頁)。
+
+### 設定頁面
+在Spotlight Settings 頁面中，您可以：
+    自訂分頁、書籤、歷史紀錄與搜尋模式的觸發前綴。
+    新增自訂搜尋引擎：設定前綴、名稱，以及包含 `%s` 佔位符的搜尋網址。
 
 ### 安裝教學 (開發者模式)
 
