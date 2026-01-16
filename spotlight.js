@@ -90,7 +90,8 @@ function updateUI() {
   input.classList.remove("has-mode");
 
   if (currentModePrefix === "") {
-    input.placeholder = "Search or type a URL…";
+    // [I18N] 預設提示文字
+    input.placeholder = browser.i18n.getMessage("phDefault");
   } else {
     input.classList.add("has-mode");
     
@@ -101,21 +102,29 @@ function updateUI() {
     const rawPrefix = currentModePrefix.trim();
 
     if (rawPrefix === p.tab) {
-        badgeText = "Tabs"; badgeClass = "mode-tab"; placeholderText = "Search open tabs…";
+        badgeText = browser.i18n.getMessage("badgeTabs"); 
+        badgeClass = "mode-tab"; 
+        placeholderText = browser.i18n.getMessage("phTabs");
     } else if (rawPrefix === p.bookmark) {
-        badgeText = "Bookmarks"; badgeClass = "mode-bookmark"; placeholderText = "Search bookmarks…";
+        badgeText = browser.i18n.getMessage("badgeBookmarks"); 
+        badgeClass = "mode-bookmark"; 
+        placeholderText = browser.i18n.getMessage("phBookmarks");
     } else if (rawPrefix === p.history) {
-        badgeText = "History"; badgeClass = "mode-history"; placeholderText = "Search history…";
+        badgeText = browser.i18n.getMessage("badgeHistory"); 
+        badgeClass = "mode-history"; 
+        placeholderText = browser.i18n.getMessage("phHistory");
     } else if (rawPrefix === p.search) {
-        badgeText = "Web"; badgeClass = "mode-search"; placeholderText = "Google search…";
+        badgeText = browser.i18n.getMessage("badgeWeb"); 
+        badgeClass = "mode-search"; 
+        placeholderText = browser.i18n.getMessage("phWeb");
     } else {
         if (settings.customEngines) {
             const matched = settings.customEngines.find(eng => eng.prefix === rawPrefix);
             if (matched) {
                 badgeText = matched.name;
-                // 使用自訂的樣式類別，這樣也能套用綠色背景
                 badgeClass = "mode-custom"; 
-                placeholderText = `Search ${matched.name}...`;
+                // [I18N] 動態帶入搜尋引擎名稱
+                placeholderText = browser.i18n.getMessage("phSearchCustom", matched.name);
             }
         }
     }

@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Firefox Spotlight Hybrid",
+  "default_locale": "en",
+  "name": "__MSG_extName__",
   "version": "3.1",
-  "description": "Floating overlay on web pages, popup window on system pages.",
+  "description": "__MSG_extDesc__",
   "permissions": [
     "tabs", 
     "activeTab", 
@@ -41,7 +42,7 @@
         "default": "Command+Shift+9",
         "mac": "Command+Shift+9"
       },
-      "description": "Toggle Spotlight"
+      "description": "__MSG_cmdToggle__"
     }
   }
 }

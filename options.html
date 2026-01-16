@@ -15,8 +15,6 @@
     #status { margin-left: 10px; color: #4caf50; font-size: 14px; opacity: 0; transition: opacity 0.5s; }
     .note { font-size: 12px; color: #aaa; margin-top: 5px; }
     code { background: #444; padding: 2px 5px; border-radius: 3px; }
-
-    /* 新增的表格與輸入樣式 */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
     th, td { text-align: left; padding: 8px; border-bottom: 1px solid #444; }
     th { color: #aaa; font-weight: normal; }
@@ -30,76 +28,76 @@
 </head>
 <body>
 
-  <h2>Spotlight Settings</h2>
+  <h2 data-i18n="settingsTitle">Spotlight Settings</h2>
 
   <div class="section">
-    <h3>Search Prefixes</h3>
-    <p class="note">Define the short commands to switch search modes. (e.g., "%t ")</p>
+    <h3 data-i18n="secPrefixes">Search Prefixes</h3>
+    <p class="note" data-i18n="notePrefixes"></p>
     
     <div class="form-group">
-      <label for="prefix-tab">Tabs:</label>
+      <label for="prefix-tab" data-i18n="lblTabs">Tabs:</label>
       <input type="text" id="prefix-tab" placeholder="%t">
     </div>
     <div class="form-group">
-      <label for="prefix-bookmark">Bookmarks:</label>
+      <label for="prefix-bookmark" data-i18n="lblBookmarks">Bookmarks:</label>
       <input type="text" id="prefix-bookmark" placeholder="%b">
     </div>
     <div class="form-group">
-      <label for="prefix-history">History:</label>
+      <label for="prefix-history" data-i18n="lblHistory">History:</label>
       <input type="text" id="prefix-history" placeholder="%h">
     </div>
     <div class="form-group">
-      <label for="prefix-search">Web Search:</label>
+      <label for="prefix-search" data-i18n="lblWeb">Web Search:</label>
       <input type="text" id="prefix-search" placeholder="%s">
     </div>
     
-    <button id="save">Save Settings</button>
-    <span id="status">Saved!</span>
+    <button id="save" data-i18n="btnSave">Save Settings</button>
+    <span id="status" data-i18n="msgSaved">Saved!</span>
   </div>
 
   <div class="section">
-    <h3>Custom Search Engines</h3>
-    <p class="note">Define custom shortcuts (e.g., prefix <code>@wiki</code> for Wikipedia).</p>
-    <p class="note">Use <code>%s</code> in the URL as a placeholder for your search keyword.</p>
+    <h3 data-i18n="secCustom">Custom Search Engines</h3>
+    <p class="note"><span data-i18n="noteCustom1"></span></p>
+    <p class="note"><span data-i18n="noteCustom2"></span></p>
     
     <div class="add-row">
       <div>
-        <label style="width:auto; margin-bottom: 5px; font-size: 12px;">Prefix</label>
+        <label style="width:auto; margin-bottom: 5px; font-size: 12px;" data-i18n="lblPrefix">Prefix</label>
         <input type="text" id="new-prefix" placeholder="@wiki">
       </div>
       <div>
-        <label style="width:auto; margin-bottom: 5px; font-size: 12px;">Name</label>
+        <label style="width:auto; margin-bottom: 5px; font-size: 12px;" data-i18n="lblName">Name</label>
         <input type="text" id="new-name" placeholder="Wikipedia">
       </div>
       <div>
-        <label style="width:auto; margin-bottom: 5px; font-size: 12px;">URL</label>
+        <label style="width:auto; margin-bottom: 5px; font-size: 12px;" data-i18n="lblUrl">URL</label>
         <input type="text" id="new-url" class="long" placeholder="https://.../search?q=%s">
       </div>
-      <button id="add-engine" style="padding: 9px 15px;">Add</button>
+      <button id="add-engine" style="padding: 9px 15px;" data-i18n="btnAdd">Add</button>
     </div>
 
     <table id="engine-list">
       <thead>
         <tr>
-          <th style="width: 20%;">Prefix</th>
-          <th style="width: 20%;">Name</th>
-          <th>URL</th>
-          <th style="width: 10%;">Action</th>
+          <th style="width: 20%;" data-i18n="thPrefix">Prefix</th>
+          <th style="width: 20%;" data-i18n="thName">Name</th>
+          <th data-i18n="thUrl">URL</th>
+          <th style="width: 10%;" data-i18n="thAction">Action</th>
         </tr>
       </thead>
       <tbody>
-        </tbody>
+      </tbody>
     </table>
   </div>
 
   <div class="section">
-    <h3>Key Bindings</h3>
-    <p>To change the shortcut (default <code>Cmd+Shift+9</code>), please use Firefox's native shortcut manager:</p>
+    <h3 data-i18n="secKeys">Key Bindings</h3>
+    <p data-i18n="msgKeysDesc"></p>
     <ol>
-      <li>Go to <code>about:addons</code></li>
-      <li>Click the ⚙️ (Gear icon) at the top right.</li>
-      <li>Select <strong>"Manage Extension Shortcuts"</strong>.</li>
-      <li>Find "Firefox Spotlight Hybrid" and set your key.</li>
+      <li data-i18n="msgKeysStep1"></li>
+      <li data-i18n="msgKeysStep2"></li>
+      <li data-i18n="msgKeysStep3"></li>
+      <li data-i18n="msgKeysStep4"></li>
     </ol>
   </div>
 

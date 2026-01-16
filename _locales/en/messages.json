@@ -1,0 +1,46 @@
+{
+    "extName": { "message": "Firefox Spotlight Hybrid" },
+    "extDesc": { "message": "Floating overlay on web pages, popup window on system pages." },
+    "cmdToggle": { "message": "Toggle Spotlight" },
+    
+    "settingsTitle": { "message": "Spotlight Settings" },
+    "secPrefixes": { "message": "Search Prefixes" },
+    "notePrefixes": { "message": "Define the short commands to switch search modes. (e.g., \"%t \")" },
+    "lblTabs": { "message": "Tabs:" },
+    "lblBookmarks": { "message": "Bookmarks:" },
+    "lblHistory": { "message": "History:" },
+    "lblWeb": { "message": "Web Search:" },
+    "btnSave": { "message": "Save Settings" },
+    "msgSaved": { "message": "Saved!" },
+    
+    "secCustom": { "message": "Custom Search Engines" },
+    "noteCustom1": { "message": "Define custom shortcuts (e.g., prefix @wiki for Wikipedia)." },
+    "noteCustom2": { "message": "Use %s in the URL as a placeholder for your search keyword." },
+    "lblPrefix": { "message": "Prefix" },
+    "lblName": { "message": "Name" },
+    "lblUrl": { "message": "URL" },
+    "thPrefix": { "message": "Prefix" },
+    "thName": { "message": "Name" },
+    "thUrl": { "message": "URL" },
+    "thAction": { "message": "Action" },
+    "btnAdd": { "message": "Add" },
+    
+    "secKeys": { "message": "Key Bindings" },
+    "msgKeysDesc": { "message": "To change the shortcut (default Cmd+Shift+9), please use Firefox's native shortcut manager:" },
+    "msgKeysStep1": { "message": "Go to about:addons" },
+    "msgKeysStep2": { "message": "Click the ⚙️ (Gear icon) at the top right." },
+    "msgKeysStep3": { "message": "Select \"Manage Extension Shortcuts\"." },
+    "msgKeysStep4": { "message": "Find \"Firefox Spotlight Hybrid\" and set your key." },
+  
+    "phDefault": { "message": "Search or type a URL…" },
+    "phTabs": { "message": "Search open tabs…" },
+    "phBookmarks": { "message": "Search bookmarks…" },
+    "phHistory": { "message": "Search history…" },
+    "phWeb": { "message": "Google search…" },
+    "phSearchCustom": { "message": "Search $NAME$...", "placeholders": { "name": { "content": "$1" } } },
+    
+    "badgeTabs": { "message": "Tabs" },
+    "badgeBookmarks": { "message": "Bookmarks" },
+    "badgeHistory": { "message": "History" },
+    "badgeWeb": { "message": "Web" }
+  }

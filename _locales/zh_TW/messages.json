@@ -1,0 +1,46 @@
+{
+    "extName": { "message": "Firefox Spotlight Hybrid" },
+    "extDesc": { "message": "在一般網頁顯示浮動搜尋框，系統頁面則使用獨立彈出視窗。" },
+    "cmdToggle": { "message": "切換 Spotlight" },
+    
+    "settingsTitle": { "message": "Spotlight 設定" },
+    "secPrefixes": { "message": "搜尋前綴" },
+    "notePrefixes": { "message": "定義切換搜尋模式的短指令 (例如 \"%t \")" },
+    "lblTabs": { "message": "分頁:" },
+    "lblBookmarks": { "message": "書籤:" },
+    "lblHistory": { "message": "歷史紀錄:" },
+    "lblWeb": { "message": "網頁搜尋:" },
+    "btnSave": { "message": "儲存設定" },
+    "msgSaved": { "message": "已儲存！" },
+    
+    "secCustom": { "message": "自訂搜尋引擎" },
+    "noteCustom1": { "message": "定義自訂快捷鍵 (例如使用 @wiki 搜尋維基百科)。" },
+    "noteCustom2": { "message": "請在網址中使用 %s 作為關鍵字的佔位符。" },
+    "lblPrefix": { "message": "前綴" },
+    "lblName": { "message": "名稱" },
+    "lblUrl": { "message": "網址" },
+    "thPrefix": { "message": "前綴" },
+    "thName": { "message": "名稱" },
+    "thUrl": { "message": "網址" },
+    "thAction": { "message": "動作" },
+    "btnAdd": { "message": "新增" },
+    
+    "secKeys": { "message": "快捷鍵綁定" },
+    "msgKeysDesc": { "message": "若要更改快捷鍵 (預設為 Cmd+Shift+9)，請使用 Firefox 內建的快捷鍵管理員：" },
+    "msgKeysStep1": { "message": "前往 about:addons 頁面" },
+    "msgKeysStep2": { "message": "點擊右上角的 ⚙️ (齒輪圖示)。" },
+    "msgKeysStep3": { "message": "選擇「管理擴充套件快捷鍵」。" },
+    "msgKeysStep4": { "message": "找到「Firefox Spotlight Hybrid」並設定您的按鍵。" },
+  
+    "phDefault": { "message": "搜尋或輸入網址…" },
+    "phTabs": { "message": "搜尋已開啟的分頁…" },
+    "phBookmarks": { "message": "搜尋書籤…" },
+    "phHistory": { "message": "搜尋歷史紀錄…" },
+    "phWeb": { "message": "Google 搜尋…" },
+    "phSearchCustom": { "message": "搜尋 $NAME$...", "placeholders": { "name": { "content": "$1" } } },
+    
+    "badgeTabs": { "message": "分頁" },
+    "badgeBookmarks": { "message": "書籤" },
+    "badgeHistory": { "message": "紀錄" },
+    "badgeWeb": { "message": "網路" }
+  }
