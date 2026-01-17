@@ -91,6 +91,8 @@ function updateUI() {
 
   if (currentModePrefix === "") {
     input.placeholder = browser.i18n.getMessage("phDefault");
+    // 重置 padding，移除行內樣式讓它回復 CSS 預設值
+    input.style.paddingLeft = ""; 
   } else {
     input.classList.add("has-mode");
     
@@ -130,6 +132,14 @@ function updateUI() {
     prefixIndicator.textContent = badgeText;
     prefixIndicator.classList.add("show", badgeClass);
     input.placeholder = placeholderText;
+
+    // --- [修正] 動態計算 Padding ---
+    requestAnimationFrame(() => {
+        const badgeWidth = prefixIndicator.offsetWidth;
+        // 左邊距 8px (CSS定義) + badge寬度 + 額外間距 12px
+        const newPadding = 8 + badgeWidth + 12;
+        input.style.paddingLeft = `${newPadding}px`;
+    });
   }
 }
 
@@ -187,7 +197,7 @@ function renderHighlightedText(container, text, indices) {
     if (start > lastIndex) {
       container.appendChild(document.createTextNode(text.substring(lastIndex, start)));
     }
-    // 加入高亮文字
+    // 加highlight文字
     const span = document.createElement("span");
     span.className = "highlight";
     span.textContent = text.substring(start, end + 1);

@@ -43,10 +43,18 @@ browser.commands.onCommand.addListener(async (cmd) => {
 
 async function toggleSpotlightOverlay(tabId) {
   try {
-    await browser.scripting.executeScript({ target: { tabId: tabId }, files: ["content.js"] });
-    browser.tabs.sendMessage(tabId, { action: "TOGGLE_UI" });
+    // 先嘗試發送訊息，確認 content script 是否存活
+    await browser.tabs.sendMessage(tabId, { action: "TOGGLE_UI" });
   } catch (err) {
-    toggleSpotlightWindow();
+    // 如果發送失敗 (接收端不存在)，執行注入
+    try {
+      await browser.scripting.executeScript({ target: { tabId: tabId }, files: ["content.js"] });
+      // 注入後再次發送
+      browser.tabs.sendMessage(tabId, { action: "TOGGLE_UI" });
+    } catch (injectErr) {
+      // 真的無法注入 (例如權限問題)，回退到 Popup 模式
+      toggleSpotlightWindow();
+    }
   }
 }
 
@@ -55,8 +63,35 @@ async function toggleSpotlightWindow() {
     try { await browser.windows.remove(popupWindowId); } catch (e) {}
     popupWindowId = null;
   } else {
-    const win = await browser.windows.create({ url: "spotlight.html", type: "popup", width: 700, height: 600 });
+    const width = 700;
+    const height = 600;
+    
+    // 預設建立參數
+    let createData = {
+        url: "spotlight.html",
+        type: "popup",
+        width: width,
+        height: height
+    };
+
+    try {
+        // 嘗試獲取當前視窗以進行置中計算
+        const currentWin = await browser.windows.getLastFocused();
+        if (currentWin) {
+            // 計算置中座標
+            const left = Math.round(currentWin.left + (currentWin.width - width) / 2);
+            const top = Math.round(currentWin.top + (currentWin.height - height) / 2);
+            
+            createData.left = left;
+            createData.top = top;
+        }
+    } catch (e) {
+        console.error("Failed to calculate center position:", e);
+    }
+
+    const win = await browser.windows.create(createData);
     popupWindowId = win.id;
+    
     browser.windows.onRemoved.addListener((id) => { if (id === popupWindowId) popupWindowId = null; });
   }
 }
@@ -136,18 +171,34 @@ async function handleSearch(rawQuery) {
     const tabs = await browser.tabs.query({});
     if (keyword.length === 0) {
         tabs.forEach(t => {
-             results.push({ type: "tab", title: t.title, url: t.url, id: t.id, windowId: t.windowId });
+             results.push({ 
+               type: "tab", 
+               title: t.title, 
+               url: t.url, 
+               favIconUrl: t.favIconUrl, // 優先使用原生 icon
+               id: t.id, 
+               windowId: t.windowId 
+             });
         });
     } else {
         const options = {
           includeScore: true,
+          includeMatches: true, // 開啟匹配資訊回傳
           keys: [{ name: 'title', weight: 0.7 }, { name: 'url', weight: 0.3 }],
           threshold: 0.4,
           ignoreLocation: true 
         };
         const fuse = new Fuse(tabs, options);
         fuse.search(keyword).forEach(res => {
-          results.push({ type: "tab", title: res.item.title, url: res.item.url, id: res.item.id, windowId: res.item.windowId });
+          results.push({ 
+            type: "tab", 
+            title: res.item.title, 
+            url: res.item.url, 
+            favIconUrl: res.item.favIconUrl, // 優先使用原生 icon
+            id: res.item.id, 
+            windowId: res.item.windowId,
+            matches: res.matches // 傳遞 Fuse 的匹配資訊
+          });
         });
     }
   }
