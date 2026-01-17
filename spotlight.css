@@ -66,6 +66,7 @@ body {
 #prefix-indicator.mode-bookmark { background-color: #28a745; } 
 #prefix-indicator.mode-history  { background-color: #ffc107; color: black; } 
 #prefix-indicator.mode-search   { background-color: #007bff; } 
+#prefix-indicator.mode-custom   { background-color: #58D667; color: black; }
 
 #input {
   width: 100%;
@@ -120,6 +121,7 @@ body {
 #mode-badge.mode-bookmark { background-color: #28a745; } 
 #mode-badge.mode-history  { background-color: #ffc107; color: black; } 
 #mode-badge.mode-search   { background-color: #007bff; } 
+#mode-badge.mode-custom   { background-color: #58D667; color: black; }
 
 #results {
   margin: 10px 0 0;
@@ -181,10 +183,9 @@ body {
   color: black;
 }
 
-#prefix-indicator.mode-custom,
-#mode-badge.mode-custom {
-  background-color: #58D667;
-  color: black;
+.highlight {
+  color: #58D667; 
+  font-weight: bold;
 }
 
 .favicon {

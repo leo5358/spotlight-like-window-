@@ -90,7 +90,6 @@ function updateUI() {
   input.classList.remove("has-mode");
 
   if (currentModePrefix === "") {
-    // [I18N] 預設提示文字
     input.placeholder = browser.i18n.getMessage("phDefault");
   } else {
     input.classList.add("has-mode");
@@ -123,7 +122,6 @@ function updateUI() {
             if (matched) {
                 badgeText = matched.name;
                 badgeClass = "mode-custom"; 
-                // [I18N] 動態帶入搜尋引擎名稱
                 placeholderText = browser.i18n.getMessage("phSearchCustom", matched.name);
             }
         }
@@ -156,6 +154,7 @@ const handleSearch = debounce(async () => {
 }, 300);
 
 function getFaviconSource(item) {
+  // 優先使用從 background 傳來的 favIconUrl (例如 tab 原生的)
   if (item.favIconUrl) {
     return item.favIconUrl;
   }
@@ -170,6 +169,37 @@ function getFaviconSource(item) {
     } catch (e) { console.error(e); }
   }
   return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gray"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>';
+}
+
+// 輔助函式：根據 indices 切割字串並加入 highlight class
+function renderHighlightedText(container, text, indices) {
+  if (!indices || indices.length === 0) {
+    container.textContent = text;
+    return;
+  }
+
+  let lastIndex = 0;
+  // Fuse 的 indices 通常已經排序，但保險起見可以 sort 一下
+  // const sortedIndices = indices.sort((a, b) => a[0] - b[0]);
+  
+  indices.forEach(([start, end]) => {
+    // 加入一般文字 (匹配前的部分)
+    if (start > lastIndex) {
+      container.appendChild(document.createTextNode(text.substring(lastIndex, start)));
+    }
+    // 加入高亮文字
+    const span = document.createElement("span");
+    span.className = "highlight";
+    span.textContent = text.substring(start, end + 1);
+    container.appendChild(span);
+    
+    lastIndex = end + 1;
+  });
+  
+  // 加入剩餘文字
+  if (lastIndex < text.length) {
+    container.appendChild(document.createTextNode(text.substring(lastIndex)));
+  }
 }
 
 function renderList(list) {
@@ -190,15 +220,22 @@ function renderList(list) {
     else if (item.type === "bookmark") { tag.textContent = "BMK"; tag.classList.add("tag-book"); }
     else if (item.type === "history") { tag.textContent = "HIS"; tag.classList.add("tag-hist"); }
     else if (item.type === "search") { tag.textContent = "WEB"; tag.classList.add("tag-search"); }
-    // 使用 tag-custom 類別
     else if (item.type === "custom-search") { tag.textContent = "SRC"; tag.classList.add("tag-custom"); } 
     
-    const text = document.createElement("span");
-    text.textContent = item.title;
+    const textSpan = document.createElement("span");
+    
+    // 檢查是否有 title 的匹配資訊 (來自 Fuse)
+    const titleMatch = item.matches ? item.matches.find(m => m.key === 'title') : null;
+    
+    if (titleMatch) {
+        renderHighlightedText(textSpan, item.title, titleMatch.indices);
+    } else {
+        textSpan.textContent = item.title;
+    }
     
     li.appendChild(img);
     li.appendChild(tag);
-    li.appendChild(text);
+    li.appendChild(textSpan);
 
     li.addEventListener("click", (e) => triggerExecute(item, e.shiftKey));
     if (i === selectedIndex) li.classList.add("active");

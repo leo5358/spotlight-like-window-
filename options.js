@@ -35,18 +35,42 @@ function restoreOptions() {
 
 function renderEngines() {
   const tbody = document.querySelector("#engine-list tbody");
-  tbody.innerHTML = "";
+  tbody.innerHTML = ""; // 清空舊內容
   
   if (!currentSettings.customEngines) currentSettings.customEngines = [];
 
   currentSettings.customEngines.forEach((engine, index) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><code>${engine.prefix}</code></td>
-      <td>${engine.name}</td>
-      <td style="color:#aaa; font-size:12px; word-break: break-all;">${engine.url}</td>
-      <td><button class="btn-remove" data-index="${index}">✕</button></td>
-    `;
+
+    // Prefix Column
+    const tdPrefix = document.createElement("td");
+    const codePrefix = document.createElement("code");
+    codePrefix.textContent = engine.prefix;
+    tdPrefix.appendChild(codePrefix);
+
+    // Name Column
+    const tdName = document.createElement("td");
+    tdName.textContent = engine.name;
+
+    // URL Column
+    const tdUrl = document.createElement("td");
+    tdUrl.textContent = engine.url;
+    tdUrl.style.cssText = "color:#aaa; font-size:12px; word-break: break-all;";
+
+    // Action Column
+    const tdAction = document.createElement("td");
+    const btnRemove = document.createElement("button");
+    btnRemove.className = "btn-remove";
+    btnRemove.setAttribute("data-index", index);
+    btnRemove.textContent = "✕";
+    tdAction.appendChild(btnRemove);
+
+    // Append all to row
+    tr.appendChild(tdPrefix);
+    tr.appendChild(tdName);
+    tr.appendChild(tdUrl);
+    tr.appendChild(tdAction);
+
     tbody.appendChild(tr);
   });
 
@@ -106,7 +130,6 @@ document.querySelector("#add-engine").addEventListener("click", (e) => {
   }
 });
 
-// DOM 載入後先翻譯，再還原設定
 document.addEventListener("DOMContentLoaded", () => {
   localizeHtml();
   restoreOptions();
