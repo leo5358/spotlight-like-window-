@@ -16,12 +16,13 @@
     * **Overlay Mode**: Injects a sleek, floating modal directly into the web page you are viewing.
     * **Popup Window Mode**: Automatically falls back to a standalone popup window on restricted pages (e.g., `about:config`, `addons.mozilla.org`) where content scripts are blocked.
 * **Dark Mode UI**: Designed with a clean, deep dark aesthetic to reduce eye strain.
+* **Customizable UI**: Personalize the **colors** of search mode badges (Tabs, Bookmarks, History) and individual custom search engines to match your preference.
 * **Smart Search**:
     * **Switch Tabs**: Find and jump to open tabs across windows.
     * **Bookmarks**: Search your saved bookmarks.
     * **History**: Retrieve recently visited pages.
     * **Web Search**: Default fallback to web search.
-* Custom Search Engines: Define your own shortcuts (e.g., @wiki for Wikipedia) to search specific sites directly.
+* **Custom Search Engines**: Define your own shortcuts (e.g., `@wiki` for Wikipedia) to search specific sites directly.
 
 ### Usage
 
@@ -39,8 +40,8 @@
 
 ### Configuration
 Access the **Settings** page to:
-    Customize the default prefixes for Tabs, Bookmarks, and History.
-    Add custom search engines by defining a name, prefix, and a URL with a `%s` placeholder.
+* Customize the default prefixes and **badge colors** for Tabs, Bookmarks, History, and Web Search.
+* Add custom search engines by defining a name, prefix, URL (with `%s` placeholder), and a **custom color**.
 
 ### Installation (Developer Mode)
 
@@ -61,7 +62,7 @@ This extension requires `<all_urls>` permission to inject the overlay UI into we
 <a name="traditional-chinese"></a>
 ## Traditional Chinese (繁體中文)
 
-**Firefox Spotlight Hybrid** 是一個提升生產力的 Firefox 擴充套件，為瀏覽器帶來類似 macOS Spotlight 的全域命令列體驗。讓你不需離開鍵盤，即可快速切換分頁、搜尋書籤、歷史紀錄或進行網頁搜尋。
+**Firefox Spotlight Hybrid** 是一個提升生產力的 Firefox 擴充套件。讓你不需離開鍵盤，即可快速切換分頁、搜尋書籤、歷史紀錄或進行網頁搜尋。
 
 ### 核心功能
 
@@ -70,12 +71,13 @@ This extension requires `<all_urls>` permission to inject the overlay UI into we
     * **疊加層模式 (Overlay)**：在一般網頁上，搜尋框會以浮動視窗形式直接顯示在頁面中央，體驗流暢。
     * **獨立視窗模式 (Popup Window)**：在受限制的頁面（如 `about:config` 系統頁面或 Firefox 附加元件商店）無法注入腳本時，會自動切換為獨立彈出視窗，確保功能隨處可用。
 * **深色模式設計**：精心調整的深色介面，視覺舒適且專業。
+* **高度客製化**：你可以自由自訂分頁、書籤、歷史紀錄及每個自訂搜尋引擎的 **標籤顏色 (Badge Colors)**，打造個人專屬風格。
 * **智慧搜尋**：
     * **切換分頁**：快速搜尋並跳轉到已開啟的分頁。
     * **書籤搜尋**：即時檢索你的收藏內容。
     * **歷史紀錄**：找回最近瀏覽過的網站。
     * **網頁搜尋**：直接透過預設引擎搜尋網路。
-* 自訂搜尋引擎：您可以自由設定快捷前綴（例如輸入 @wiki ），直接搜尋特定網站。
+* **自訂搜尋引擎**：您可以自由設定快捷前綴（例如輸入 `@wiki` ），直接搜尋特定網站。
 
 ### 使用說明
 
@@ -92,9 +94,9 @@ This extension requires `<all_urls>` permission to inject the overlay UI into we
     * *(無前綴)* : 綜合搜尋 (已開啟分頁 + 書籤 + 網頁)。
 
 ### 設定頁面
-在Spotlight Settings 頁面中，您可以：
-    自訂分頁、書籤、歷史紀錄與搜尋模式的觸發前綴。
-    新增自訂搜尋引擎：設定前綴、名稱，以及包含 `%s` 佔位符的搜尋網址。
+在 Spotlight Settings 頁面中，您可以：
+* 自訂分頁、書籤、歷史紀錄與搜尋模式的觸發前綴與 **標籤顏色**。
+* 新增自訂搜尋引擎：設定前綴、名稱、包含 `%s` 佔位符的搜尋網址，以及選擇 **專屬顏色**。
 
 ### 安裝教學 (開發者模式)
 
