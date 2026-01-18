@@ -9,6 +9,12 @@ let settings = {
     history: "%h",
     search: "%s"
   },
+  colors: {
+    tab: "#0d6efd",
+    bookmark: "#198754",
+    history: "#ffc107",
+    search: "#6c757d"
+  },
   customEngines: []
 };
 
@@ -16,6 +22,7 @@ let settings = {
 function loadSettings() {
   browser.storage.sync.get(settings).then((res) => {
     if (res.prefixes) settings.prefixes = res.prefixes;
+    if (res.colors) settings.colors = res.colors;
     if (res.customEngines) settings.customEngines = res.customEngines;
   });
 }
@@ -24,12 +31,13 @@ loadSettings();
 browser.storage.onChanged.addListener((changes, area) => {
   if (area === "sync") {
     if (changes.prefixes) settings.prefixes = changes.prefixes.newValue;
+    if (changes.colors) settings.colors = changes.colors.newValue;
     if (changes.customEngines) settings.customEngines = changes.customEngines.newValue;
   }
 });
 
-const RESTRICTED_PROTOCOLS = [ "about:", "chrome:", "edge:", "moz-extension:", "view-source:" ];
-const RESTRICTED_DOMAINS = [ "addons.mozilla.org" ];
+const RESTRICTED_PROTOCOLS = ["about:", "chrome:", "edge:", "moz-extension:", "view-source:"];
+const RESTRICTED_DOMAINS = ["addons.mozilla.org"];
 
 browser.commands.onCommand.addListener(async (cmd) => {
   if (cmd !== "toggle-spotlight") return;
@@ -43,16 +51,12 @@ browser.commands.onCommand.addListener(async (cmd) => {
 
 async function toggleSpotlightOverlay(tabId) {
   try {
-    // 先嘗試發送訊息，確認 content script 是否存活
     await browser.tabs.sendMessage(tabId, { action: "TOGGLE_UI" });
   } catch (err) {
-    // 如果發送失敗 (接收端不存在)，執行注入
     try {
       await browser.scripting.executeScript({ target: { tabId: tabId }, files: ["content.js"] });
-      // 注入後再次發送
       browser.tabs.sendMessage(tabId, { action: "TOGGLE_UI" });
     } catch (injectErr) {
-      // 真的無法注入 (例如權限問題)，回退到 Popup 模式
       toggleSpotlightWindow();
     }
   }
@@ -60,38 +64,34 @@ async function toggleSpotlightOverlay(tabId) {
 
 async function toggleSpotlightWindow() {
   if (popupWindowId) {
-    try { await browser.windows.remove(popupWindowId); } catch (e) {}
+    try { await browser.windows.remove(popupWindowId); } catch (e) { }
     popupWindowId = null;
   } else {
     const width = 700;
     const height = 600;
-    
-    // 預設建立參數
+
     let createData = {
-        url: "spotlight.html",
-        type: "popup",
-        width: width,
-        height: height
+      url: "spotlight.html",
+      type: "popup",
+      width: width,
+      height: height
     };
 
     try {
-        // 嘗試獲取當前視窗以進行置中計算
-        const currentWin = await browser.windows.getLastFocused();
-        if (currentWin) {
-            // 計算置中座標
-            const left = Math.round(currentWin.left + (currentWin.width - width) / 2);
-            const top = Math.round(currentWin.top + (currentWin.height - height) / 2);
-            
-            createData.left = left;
-            createData.top = top;
-        }
+      const currentWin = await browser.windows.getLastFocused();
+      if (currentWin) {
+        const left = Math.round(currentWin.left + (currentWin.width - width) / 2);
+        const top = Math.round(currentWin.top + (currentWin.height - height) / 2);
+        createData.left = left;
+        createData.top = top;
+      }
     } catch (e) {
-        console.error("Failed to calculate center position:", e);
+      console.error("Failed to calculate center position:", e);
     }
 
     const win = await browser.windows.create(createData);
     popupWindowId = win.id;
-    
+
     browser.windows.onRemoved.addListener((id) => { if (id === popupWindowId) popupWindowId = null; });
   }
 }
@@ -107,7 +107,7 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   if (msg.action === "SEARCH_REQUEST") {
     handleSearch(msg.query).then(results => sendResponse({ results }));
-    return true; 
+    return true;
   }
   if (msg.action === "EXECUTE_ITEM") {
     executeItem(msg.item, msg.openInNewTab, sender);
@@ -117,8 +117,8 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 async function handleSearch(rawQuery) {
   const queryLower = rawQuery.toLowerCase();
   let results = [];
-  let mode = "default"; 
-  let keyword = rawQuery.trim(); 
+  let mode = "default";
+  let keyword = rawQuery.trim();
 
   const p = settings.prefixes;
   const checkPrefix = (prefix) => queryLower.startsWith(prefix.toLowerCase() + " ");
@@ -128,17 +128,16 @@ async function handleSearch(rawQuery) {
   if (checkPrefix(p.tab)) {
     mode = "tab";
     keyword = rawQuery.substring(p.tab.length + 1).trim();
-  } else if (checkPrefix(p.bookmark)) { 
-    mode = "bookmark"; 
-    keyword = rawQuery.substring(p.bookmark.length + 1).trim(); 
-  } else if (checkPrefix(p.history)) { 
-    mode = "history"; 
-    keyword = rawQuery.substring(p.history.length + 1).trim(); 
-  } else if (checkPrefix(p.search)) { 
-    mode = "search"; 
+  } else if (checkPrefix(p.bookmark)) {
+    mode = "bookmark";
+    keyword = rawQuery.substring(p.bookmark.length + 1).trim();
+  } else if (checkPrefix(p.history)) {
+    mode = "history";
+    keyword = rawQuery.substring(p.history.length + 1).trim();
+  } else if (checkPrefix(p.search)) {
+    mode = "search";
     keyword = rawQuery.substring(p.search.length + 1).trim();
   } else {
-    // 檢查自訂引擎列表
     if (settings.customEngines) {
       matchedCustomEngine = settings.customEngines.find(eng => checkPrefix(eng.prefix));
       if (matchedCustomEngine) {
@@ -153,13 +152,13 @@ async function handleSearch(rawQuery) {
     if (keyword.length > 0) {
       const targetUrl = matchedCustomEngine.url.replace("%s", encodeURIComponent(keyword));
       let hostname = "";
-      try { hostname = new URL(targetUrl).hostname; } catch(e){}
+      try { hostname = new URL(targetUrl).hostname; } catch (e) { }
 
       results.push({
         type: "custom-search",
         title: `Search ${matchedCustomEngine.name} for "${keyword}"`,
         url: targetUrl,
-        // 嘗試取得該網站的 Favicon
+        color: matchedCustomEngine.color || "#58D667", // 傳遞顏色
         favIconUrl: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
       });
     }
@@ -170,36 +169,36 @@ async function handleSearch(rawQuery) {
   if (mode === "default" || mode === "tab") {
     const tabs = await browser.tabs.query({});
     if (keyword.length === 0) {
-        tabs.forEach(t => {
-             results.push({ 
-               type: "tab", 
-               title: t.title, 
-               url: t.url, 
-               favIconUrl: t.favIconUrl, // 優先使用原生 icon
-               id: t.id, 
-               windowId: t.windowId 
-             });
+      tabs.forEach(t => {
+        results.push({
+          type: "tab",
+          title: t.title,
+          url: t.url,
+          favIconUrl: t.favIconUrl,
+          id: t.id,
+          windowId: t.windowId
         });
+      });
     } else {
-        const options = {
-          includeScore: true,
-          includeMatches: true, // 開啟匹配資訊回傳
-          keys: [{ name: 'title', weight: 0.7 }, { name: 'url', weight: 0.3 }],
-          threshold: 0.4,
-          ignoreLocation: true 
-        };
-        const fuse = new Fuse(tabs, options);
-        fuse.search(keyword).forEach(res => {
-          results.push({ 
-            type: "tab", 
-            title: res.item.title, 
-            url: res.item.url, 
-            favIconUrl: res.item.favIconUrl, // 優先使用原生 icon
-            id: res.item.id, 
-            windowId: res.item.windowId,
-            matches: res.matches // 傳遞 Fuse 的匹配資訊
-          });
+      const options = {
+        includeScore: true,
+        includeMatches: true,
+        keys: [{ name: 'title', weight: 0.7 }, { name: 'url', weight: 0.3 }],
+        threshold: 0.4,
+        ignoreLocation: true
+      };
+      const fuse = new Fuse(tabs, options);
+      fuse.search(keyword).forEach(res => {
+        results.push({
+          type: "tab",
+          title: res.item.title,
+          url: res.item.url,
+          favIconUrl: res.item.favIconUrl,
+          id: res.item.id,
+          windowId: res.item.windowId,
+          matches: res.matches
         });
+      });
     }
   }
 
@@ -212,44 +211,43 @@ async function handleSearch(rawQuery) {
       });
     }
   }
-  
+
   if (mode === "history") {
-     if (keyword.length > 0) {
-         const history = await browser.history.search({ text: keyword, maxResults: 15, startTime: 0 });
-         history.forEach(h => {
-           results.push({ type: "history", title: h.title || h.url, url: h.url });
-         });
-     }
+    if (keyword.length > 0) {
+      const history = await browser.history.search({ text: keyword, maxResults: 15, startTime: 0 });
+      history.forEach(h => {
+        results.push({ type: "history", title: h.title || h.url, url: h.url });
+      });
+    }
   }
 
   // 預設網頁搜尋
   if (keyword.length > 0) {
-      results.push({ type: "search", title: `Search Web for "${keyword}"`, query: keyword });
+    results.push({ type: "search", title: `Search Web for "${keyword}"`, query: keyword });
   }
 
   return results;
 }
 
 async function executeItem(item, openInNewTab, sender) {
-    if (item.type === "tab") {
-      browser.tabs.update(item.id, { active: true });
-      if (item.windowId) browser.windows.update(item.windowId, { focused: true }).catch(() => {});
-    } 
-    // 處理 custom-search (直接開連結)
-    else if (item.type === "bookmark" || item.type === "history" || item.type === "custom-search") {
-      if (openInNewTab) browser.tabs.create({ url: item.url });
-      else {
-        let targetTabId = null;
-        const isPopupWindow = (popupWindowId && sender.tab && sender.tab.windowId === popupWindowId);
-        if (isPopupWindow) {
-          const wins = await browser.tabs.query({ active: true, windowType: 'normal', lastFocusedWindow: true });
-          if (wins.length > 0) targetTabId = wins[0].id;
-          else { const anyWins = await browser.tabs.query({ active: true, windowType: 'normal' }); if (anyWins.length > 0) targetTabId = anyWins[0].id; }
-        } else { if (sender.tab) targetTabId = sender.tab.id; }
-        if (targetTabId) browser.tabs.update(targetTabId, { url: item.url });
-        else browser.tabs.create({ url: item.url });
-      }
-    } else if (item.type === "search") {
-      browser.search.search({ query: item.query, disposition: openInNewTab ? "NEW_TAB" : "CURRENT_TAB" });
+  if (item.type === "tab") {
+    browser.tabs.update(item.id, { active: true });
+    if (item.windowId) browser.windows.update(item.windowId, { focused: true }).catch(() => { });
+  }
+  else if (item.type === "bookmark" || item.type === "history" || item.type === "custom-search") {
+    if (openInNewTab) browser.tabs.create({ url: item.url });
+    else {
+      let targetTabId = null;
+      const isPopupWindow = (popupWindowId && sender.tab && sender.tab.windowId === popupWindowId);
+      if (isPopupWindow) {
+        const wins = await browser.tabs.query({ active: true, windowType: 'normal', lastFocusedWindow: true });
+        if (wins.length > 0) targetTabId = wins[0].id;
+        else { const anyWins = await browser.tabs.query({ active: true, windowType: 'normal' }); if (anyWins.length > 0) targetTabId = anyWins[0].id; }
+      } else { if (sender.tab) targetTabId = sender.tab.id; }
+      if (targetTabId) browser.tabs.update(targetTabId, { url: item.url });
+      else browser.tabs.create({ url: item.url });
     }
+  } else if (item.type === "search") {
+    browser.search.search({ query: item.query, disposition: openInNewTab ? "NEW_TAB" : "CURRENT_TAB" });
+  }
 }
