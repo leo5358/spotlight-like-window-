@@ -18,6 +18,18 @@ let settings = {
   customEngines: []
 };
 
+// --- [優化] 全域變數：用來快取分頁資料與 Fuse 實例 ---
+let tabsCache = [];
+let fuseInstance = null;
+// Fuse 選項設定 (靜態)
+const fuseOptions = {
+  includeScore: true,
+  includeMatches: true,
+  keys: [{ name: 'title', weight: 0.7 }, { name: 'url', weight: 0.3 }],
+  threshold: 0.4,
+  ignoreLocation: true
+};
+
 // 初始化設定並監聽變更
 function loadSettings() {
   browser.storage.sync.get(settings).then((res) => {
@@ -27,6 +39,39 @@ function loadSettings() {
   });
 }
 loadSettings();
+
+// --- [優化] 索引管理函式 ---
+// 重新抓取分頁並更新 Fuse 集合，不用每次都 new Fuse
+async function updateTabsIndex() {
+  try {
+    tabsCache = await browser.tabs.query({});
+    if (!fuseInstance) {
+      // 第一次建立
+      fuseInstance = new Fuse(tabsCache, fuseOptions);
+    } else {
+      // 後續更新：直接更新資料集合 (比重新 new 快)
+      fuseInstance.setCollection(tabsCache);
+    }
+  } catch (e) {
+    console.error("Failed to update tab index:", e);
+  }
+}
+
+// 初始化時建立索引
+updateTabsIndex();
+
+// --- [優化] 監聽分頁事件，自動更新索引 ---
+// 1. 分頁建立
+browser.tabs.onCreated.addListener(updateTabsIndex);
+// 2. 分頁移除
+browser.tabs.onRemoved.addListener(updateTabsIndex);
+// 3. 分頁更新 (只在標題或網址改變時更新，避免頻繁觸發)
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' || changeInfo.title || changeInfo.url) {
+    updateTabsIndex();
+  }
+});
+
 
 browser.storage.onChanged.addListener((changes, area) => {
   if (area === "sync") {
@@ -41,6 +86,10 @@ const RESTRICTED_DOMAINS = ["addons.mozilla.org"];
 
 browser.commands.onCommand.addListener(async (cmd) => {
   if (cmd !== "toggle-spotlight") return;
+  
+  // 開啟前先確保索引是最新的 (防止極端情況)
+  updateTabsIndex();
+
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   if (!tab || !tab.url || RESTRICTED_PROTOCOLS.some(p => tab.url.startsWith(p)) || RESTRICTED_DOMAINS.some(d => tab.url.includes(d))) {
     toggleSpotlightWindow();
@@ -151,25 +200,27 @@ async function handleSearch(rawQuery) {
   if (mode === "custom" && matchedCustomEngine) {
     if (keyword.length > 0) {
       const targetUrl = matchedCustomEngine.url.replace("%s", encodeURIComponent(keyword));
-      let hostname = "";
-      try { hostname = new URL(targetUrl).hostname; } catch (e) { }
-
       results.push({
         type: "custom-search",
         title: `Search ${matchedCustomEngine.name} for "${keyword}"`,
         url: targetUrl,
-        color: matchedCustomEngine.color || "#58D667", // 傳遞顏色
-        // favIconUrl: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
+        color: matchedCustomEngine.color || "#58D667"
+        /* Privacy: Removed Google Favicon URL
+         favIconUrl: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
+        */
       });
     }
     return results;
   }
 
-  // --- 分頁搜尋 (使用 Fuse.js) ---
+  // --- [優化] 分頁搜尋 (使用快取的 Fuse 實例) ---
   if (mode === "default" || mode === "tab") {
-    const tabs = await browser.tabs.query({});
+    // 確保索引存在 (防呆)
+    if (!fuseInstance) await updateTabsIndex();
+
     if (keyword.length === 0) {
-      tabs.forEach(t => {
+      // 關鍵字為空時，直接列出快取中的分頁 (取前 15 個或全部)
+      tabsCache.slice(0, 20).forEach(t => {
         results.push({
           type: "tab",
           title: t.title,
@@ -180,15 +231,8 @@ async function handleSearch(rawQuery) {
         });
       });
     } else {
-      const options = {
-        includeScore: true,
-        includeMatches: true,
-        keys: [{ name: 'title', weight: 0.7 }, { name: 'url', weight: 0.3 }],
-        threshold: 0.4,
-        ignoreLocation: true
-      };
-      const fuse = new Fuse(tabs, options);
-      fuse.search(keyword).forEach(res => {
+      // 使用快取的 fuseInstance 進行搜尋
+      fuseInstance.search(keyword).forEach(res => {
         results.push({
           type: "tab",
           title: res.item.title,
@@ -203,10 +247,11 @@ async function handleSearch(rawQuery) {
   }
 
   // --- 書籤與歷史紀錄 ---
+  // 註：這兩者 API 查詢速度通常夠快，且資料量過大不適合全部快取到記憶體，維持現狀即可。
   if (mode === "default" || mode === "bookmark") {
     if (keyword.length > 0) {
       const bookmarks = await browser.bookmarks.search({ query: keyword });
-      bookmarks.filter(b => b.url).forEach(b => {
+      bookmarks.filter(b => b.url).slice(0, 15).forEach(b => {
         results.push({ type: "bookmark", title: b.title, url: b.url });
       });
     }
@@ -244,6 +289,13 @@ async function executeItem(item, openInNewTab, sender) {
         if (wins.length > 0) targetTabId = wins[0].id;
         else { const anyWins = await browser.tabs.query({ active: true, windowType: 'normal' }); if (anyWins.length > 0) targetTabId = anyWins[0].id; }
       } else { if (sender.tab) targetTabId = sender.tab.id; }
+      
+      // Security: Check for javascript: URLs
+      if (item.url && item.url.trim().toLowerCase().startsWith("javascript:")) {
+        console.warn("Blocked execution of javascript: URL");
+        return;
+      }
+
       if (targetTabId) browser.tabs.update(targetTabId, { url: item.url });
       else browser.tabs.create({ url: item.url });
     }
