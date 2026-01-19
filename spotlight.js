@@ -48,7 +48,7 @@ function getContrastColor(hex) {
 input.addEventListener("keydown", async (e) => {
   if (e.key === "Backspace" && input.value === "" && currentModePrefix !== "") {
     e.preventDefault();
-    input.value = currentModePrefix; 
+    input.value = currentModePrefix;
     currentModePrefix = "";
     updateUI();
   }
@@ -87,11 +87,11 @@ input.addEventListener("input", (e) => {
     if (val === p.search + " ") { setMode(p.search); return; }
 
     if (settings.customEngines) {
-        const matched = settings.customEngines.find(eng => val === eng.prefix + " ");
-        if (matched) {
-            setMode(matched.prefix);
-            return;
-        }
+      const matched = settings.customEngines.find(eng => val === eng.prefix + " ");
+      if (matched) {
+        setMode(matched.prefix);
+        return;
+      }
     }
   }
 
@@ -119,48 +119,48 @@ function updateUI() {
 
   if (currentModePrefix === "") {
     input.placeholder = browser.i18n.getMessage("phDefault");
-    input.style.paddingLeft = ""; 
+    input.style.paddingLeft = "";
   } else {
     input.classList.add("has-mode");
-    
+
     let badgeText = "";
     let badgeColor = "#444"; // 預設灰
     let placeholderText = "";
-    
+
     const p = settings.prefixes;
     const c = settings.colors;
     const rawPrefix = currentModePrefix.trim();
 
     if (rawPrefix === p.tab) {
-        badgeText = browser.i18n.getMessage("badgeTabs"); 
-        badgeColor = c.tab;
-        placeholderText = browser.i18n.getMessage("phTabs");
+      badgeText = browser.i18n.getMessage("badgeTabs");
+      badgeColor = c.tab;
+      placeholderText = browser.i18n.getMessage("phTabs");
     } else if (rawPrefix === p.bookmark) {
-        badgeText = browser.i18n.getMessage("badgeBookmarks"); 
-        badgeColor = c.bookmark;
-        placeholderText = browser.i18n.getMessage("phBookmarks");
+      badgeText = browser.i18n.getMessage("badgeBookmarks");
+      badgeColor = c.bookmark;
+      placeholderText = browser.i18n.getMessage("phBookmarks");
     } else if (rawPrefix === p.history) {
-        badgeText = browser.i18n.getMessage("badgeHistory"); 
-        badgeColor = c.history;
-        placeholderText = browser.i18n.getMessage("phHistory");
+      badgeText = browser.i18n.getMessage("badgeHistory");
+      badgeColor = c.history;
+      placeholderText = browser.i18n.getMessage("phHistory");
     } else if (rawPrefix === p.search) {
-        badgeText = browser.i18n.getMessage("badgeWeb"); 
-        badgeColor = c.search;
-        placeholderText = browser.i18n.getMessage("phWeb");
+      badgeText = browser.i18n.getMessage("badgeWeb");
+      badgeColor = c.search;
+      placeholderText = browser.i18n.getMessage("phWeb");
     } else {
-        if (settings.customEngines) {
-            const matched = settings.customEngines.find(eng => eng.prefix === rawPrefix);
-            if (matched) {
-                badgeText = matched.name;
-                badgeColor = matched.color || "#58D667"; 
-                placeholderText = browser.i18n.getMessage("phSearchCustom", matched.name);
-            }
+      if (settings.customEngines) {
+        const matched = settings.customEngines.find(eng => eng.prefix === rawPrefix);
+        if (matched) {
+          badgeText = matched.name;
+          badgeColor = matched.color || "#58D667";
+          placeholderText = browser.i18n.getMessage("phSearchCustom", matched.name);
         }
+      }
     }
 
     prefixIndicator.textContent = badgeText;
     prefixIndicator.classList.add("show");
-    
+
     // 動態套用顏色
     prefixIndicator.style.backgroundColor = badgeColor;
     prefixIndicator.style.color = getContrastColor(badgeColor);
@@ -168,9 +168,9 @@ function updateUI() {
     input.placeholder = placeholderText;
 
     requestAnimationFrame(() => {
-        const badgeWidth = prefixIndicator.offsetWidth;
-        const newPadding = 8 + badgeWidth + 12;
-        input.style.paddingLeft = `${newPadding}px`;
+      const badgeWidth = prefixIndicator.offsetWidth;
+      const newPadding = 8 + badgeWidth + 12;
+      input.style.paddingLeft = `${newPadding}px`;
     });
   }
 }
@@ -184,11 +184,11 @@ async function performSearch(query) {
     return;
   }
 
-  const response = await browser.runtime.sendMessage({ 
-    action: "SEARCH_REQUEST", 
-    query: query 
+  const response = await browser.runtime.sendMessage({
+    action: "SEARCH_REQUEST",
+    query: query
   });
-  
+
   if (response && response.results) {
     currentList = response.results.slice(0, 15);
     renderList(currentList);
@@ -204,12 +204,27 @@ function getFaviconSource(item) {
   if (item.type === "search") {
     return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
   }
-  if (item.url && item.url.startsWith("http")) {
+  /*if (item.url && item.url.startsWith("http")) {
     try {
       const urlObj = new URL(item.url);
       return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
     } catch (e) { console.error(e); }
+  }*/
+  
+  //chage the facicon source
+  if (item.url && item.url.startsWith("http")) {
+    try {
+      const urlObj = new URL(item.url);
+      return `${urlObj.origin}/favicon.ico`;
+    } catch (e) {
+      console.error(e);
+    }
   }
+
+  return getDefaultGlobeIcon();
+}
+
+function getDefaultGlobeIcon(){
   return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gray"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>';
 }
 
@@ -240,55 +255,61 @@ function renderList(list) {
 
   list.forEach((item, i) => {
     const li = document.createElement("li");
-    
+
     const img = document.createElement("img");
     img.className = "favicon";
     img.src = getFaviconSource(item);
-    
+
+    // default globe icon
+    img.onerror = () => {
+      img.src = getDefaultGlobeIcon();
+      img.onerror = null; 
+    };
+
     const tag = document.createElement("span");
     tag.className = "tag";
-    
+
     let tagName = "";
     let tagColor = "#666";
 
     const c = settings.colors;
 
-    if (item.type === "tab") { 
-        tagName = "TAB"; 
-        tagColor = c.tab;
-    } else if (item.type === "bookmark") { 
-        tagName = "BMK"; 
-        tagColor = c.bookmark;
-    } else if (item.type === "history") { 
-        tagName = "HIS"; 
-        tagColor = c.history;
-    } else if (item.type === "search") { 
-        tagName = "WEB"; 
-        tagColor = c.search;
-    } else if (item.type === "custom-search") { 
-        tagName = "SRC"; 
-        tagColor = item.color || "#58D667"; // 來自 background 的 color 資訊
-    } 
+    if (item.type === "tab") {
+      tagName = "TAB";
+      tagColor = c.tab;
+    } else if (item.type === "bookmark") {
+      tagName = "BMK";
+      tagColor = c.bookmark;
+    } else if (item.type === "history") {
+      tagName = "HIS";
+      tagColor = c.history;
+    } else if (item.type === "search") {
+      tagName = "WEB";
+      tagColor = c.search;
+    } else if (item.type === "custom-search") {
+      tagName = "SRC";
+      tagColor = item.color || "#58D667"; // 來自 background 的 color 資訊
+    }
 
     tag.textContent = tagName;
     tag.style.backgroundColor = tagColor;
     tag.style.color = getContrastColor(tagColor);
-    
+
     const textSpan = document.createElement("span");
     const titleMatch = item.matches ? item.matches.find(m => m.key === 'title') : null;
     if (titleMatch) {
-        renderHighlightedText(textSpan, item.title, titleMatch.indices);
+      renderHighlightedText(textSpan, item.title, titleMatch.indices);
     } else {
-        textSpan.textContent = item.title;
+      textSpan.textContent = item.title;
     }
-    
+
     li.appendChild(img);
     li.appendChild(tag);
     li.appendChild(textSpan);
 
     li.addEventListener("click", (e) => triggerExecute(item, e.shiftKey));
     if (i === selectedIndex) li.classList.add("active");
-    
+
     results.appendChild(li);
   });
 }

@@ -159,7 +159,7 @@ async function handleSearch(rawQuery) {
         title: `Search ${matchedCustomEngine.name} for "${keyword}"`,
         url: targetUrl,
         color: matchedCustomEngine.color || "#58D667", // 傳遞顏色
-        favIconUrl: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
+        // favIconUrl: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
       });
     }
     return results;
