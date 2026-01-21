@@ -7,107 +7,85 @@
 <a name="english"></a>
 ## English
 
-**Firefox Spotlight Hybrid** is a productivity extension that brings a macOS Spotlight-like command palette to Firefox. It allows you to quickly switch tabs, search bookmarks, access history, and perform web searches without leaving your keyboard.
+**Firefox Spotlight Hybrid** is a high-productivity extension that brings an integrated command palette to Firefox. Seamlessly switch tabs, search bookmarks, access history, and perform web searches without ever leaving your keyboard.
 
 ### Key Features
 
-* **Quick Launch**: Press `Command+Shift+9` (or custom shortcut) to open the search bar instantly.
+* **Quick Launch**: Press `Command+Shift+9` (Mac) or `Ctrl+Shift+9` (Windows/Linux) to summon the palette.
 * **Hybrid Display Engine**:
-    * **Overlay Mode**: Injects a sleek, floating modal directly into the web page you are viewing.
-    * **Popup Window Mode**: Automatically falls back to a standalone popup window on restricted pages (e.g., `about:config`, `addons.mozilla.org`) where content scripts are blocked.
-* **Dark Mode UI**: Designed with a clean, deep dark aesthetic to reduce eye strain.
-* **Customizable UI**: Personalize the **colors** of search mode badges (Tabs, Bookmarks, History) and individual custom search engines to match your preference.
+    * **Overlay Mode**: A sleek, floating modal injected directly into standard web pages.
+    * **Popup Window Mode**: Automatic fallback to a standalone window on restricted pages (e.g., `about:config`, `addons.mozilla.org`).
 * **Smart Search**:
-    * **Switch Tabs**: Find and jump to open tabs across windows.
-    * **Bookmarks**: Search your saved bookmarks.
-    * **History**: Retrieve recently visited pages.
-    * **Web Search**: Default fallback to web search.
-* **Custom Search Engines**: Define your own shortcuts (e.g., `@wiki` for Wikipedia) to search specific sites directly.
+    * **Tabs**: `%t` Find and jump to open tabs.
+    * **Bookmarks**: `%b` Instant access to your saved sites.
+    * **History**: `%h` Retrieve recently visited pages.
+    * **Web Search**: `%s` Default fallback or forced web search.
+* **Fully Customizable**: Define custom search engines (e.g., `@wiki` for Wikipedia) and personalize **badge colors** to match your workflow.
+* **Privacy Focused**: Designed with a deep dark aesthetic and zero data collection.
+
+### Installation
+
+#### From Firefox Add-ons (Recommended)
+1.  Visit the [Firefox Add-ons Store](https://addons.mozilla.org/firefox/addon/spotlight-hybrid/) (Link placeholder).
+2.  Click **"Add to Firefox"**.
+
+#### Developer Mode (Manual)
+1.  Download this repository and unzip it.
+2.  Open Firefox and go to `about:debugging`.
+3.  Click **"This Firefox"** -> **"Load Temporary Add-on..."**.
+4.  Select the `manifest.json` file in the project folder.
 
 ### Usage
 
-1.  **Activate**: Press `Cmd+Shift+9` (Mac) or `Ctrl+Shift+9` (Windows/Linux).
-2.  **Navigate**: Use `Arrow Up` / `Arrow Down` to select results.
-3.  **Open**:
-    * **`Enter`**: Open in the **current tab** (or switch to the existing tab).
-    * **`Shift + Enter`**: Open result in a **new tab**.
-4.  **Search Modes** (Prefix commands):
-    * `%t [keyword]` : Search **Open Tabs** only.
-    * `%b [keyword]` : Search **Bookmarks** only.
-    * `%h [keyword]` : Search **History** only.
-    * `%s [keyword]` : Force **Web Search**.
-    * *(No prefix)* : Search everything (Open Tabs + Bookmarks + Web).
+* **`Enter`**: Open/Switch in the current tab.
+* **`Shift + Enter`**: Open in a new tab.
+* **`Arrow Up/Down`**: Navigate through results.
+* **`Esc`**: Close the palette.
 
-### Configuration
-Access the **Settings** page to:
-* Customize the default prefixes and **badge colors** for Tabs, Bookmarks, History, and Web Search.
-* Add custom search engines by defining a name, prefix, URL (with `%s` placeholder), and a **custom color**.
+### Privacy & Permissions
 
-### Installation (Developer Mode)
-
-Since this extension is not yet on the Firefox Add-ons Store, you can load it temporarily:
-
-1.  Open Firefox and navigate to `about:debugging`.
-2.  Click **"This Firefox"** on the left sidebar.
-3.  Click **"Load Temporary Add-on..."**.
-4.  Select the `manifest.json` file from this project folder.
-5.  Done! The extension is now active.
-
-### Permissions
-
-This extension requires `<all_urls>` permission to inject the overlay UI into web pages. We respect your privacy and do not collect any data.
+This extension requires `<all_urls>` permission to provide the Overlay UI on any website you browse. We do not collect, store, or transmit any browsing data, search queries, or personal information.
 
 ---
 
 <a name="traditional-chinese"></a>
 ## Traditional Chinese (繁體中文)
 
-**Firefox Spotlight Hybrid** 是一個提升生產力的 Firefox 擴充套件。讓你不需離開鍵盤，即可快速切換分頁、搜尋書籤、歷史紀錄或進行網頁搜尋。
+**Firefox Spotlight Hybrid** 是一款提升生產力的工具，為 Firefox 提供了整合式指令面板。讓你不需離開鍵盤，即可流暢地切換分頁、搜尋書籤、存取歷史紀錄或進行網頁搜尋。
 
 ### 核心功能
 
-* **快速啟動**：按下 `Command+Shift+9`（或自訂快捷鍵）即可瞬間呼叫搜尋列。
-* **混合式顯示引擎 (Hybrid Engine)**：
-    * **疊加層模式 (Overlay)**：在一般網頁上，搜尋框會以浮動視窗形式直接顯示在頁面中央，體驗流暢。
-    * **獨立視窗模式 (Popup Window)**：在受限制的頁面（如 `about:config` 系統頁面或 Firefox 附加元件商店）無法注入腳本時，會自動切換為獨立彈出視窗，確保功能隨處可用。
-* **深色模式設計**：精心調整的深色介面，視覺舒適且專業。
-* **高度客製化**：你可以自由自訂分頁、書籤、歷史紀錄及每個自訂搜尋引擎的 **標籤顏色 (Badge Colors)**，打造個人專屬風格。
-* **智慧搜尋**：
-    * **切換分頁**：快速搜尋並跳轉到已開啟的分頁。
-    * **書籤搜尋**：即時檢索你的收藏內容。
-    * **歷史紀錄**：找回最近瀏覽過的網站。
-    * **網頁搜尋**：直接透過預設引擎搜尋網路。
-* **自訂搜尋引擎**：您可以自由設定快捷前綴（例如輸入 `@wiki` ），直接搜尋特定網站。
+* **快速啟動**：按下 `Command+Shift+9` (Mac) 或 `Ctrl+Shift+9` (Windows/Linux) 瞬間呼叫搜尋列。
+* **混合式顯示引擎**：
+    * **疊加層模式 (Overlay)**：在一般網頁上以浮動視窗形式顯示，體驗流暢。
+    * **獨立視窗模式 (Popup Window)**：在受限頁面（如 `about:config`）自動切換為獨立視窗，確保功能不中斷。
+* **智慧搜尋指令**：
+    * **分頁搜尋**：使用 `%t` 快速跳轉已開啟的分頁。
+    * **書籤搜尋**：使用 `%b` 即時檢索收藏內容。
+    * **歷史紀錄**：使用 `%h` 找回最近瀏覽的網站。
+    * **網頁搜尋**：使用 `%s` 進行 Google 搜尋。
+* **高度客製化**：可自訂搜尋引擎（如 `@wiki`）與各模式的標籤顏色。
+* **隱私與美學**：專業深色模式設計，且絕不收集任何使用者資訊。
 
-### 使用說明
+### 安裝教學
 
-1.  **啟動**：按下 `Cmd+Shift+9` (Mac) 或 `Ctrl+Shift+9` (Windows/Linux)。
-2.  **操作**：使用 `方向鍵 上/下` 選擇結果。
-3.  **執行**：
-    * **`Enter`**：在 **當前分頁** 開啟（若是已開啟的分頁則直接切換）。
-    * **`Shift + Enter`**：強制在 **新分頁** 開啟。
-4.  **搜尋模式** (前綴指令)：
-    * `%t [關鍵字]` : 僅搜尋 **已開啟分頁 (Tabs)**。
-    * `%b [關鍵字]` : 僅搜尋 **書籤 (Bookmarks)**。
-    * `%h [關鍵字]` : 僅搜尋 **歷史紀錄 (History)**。
-    * `%s [關鍵字]` : 強制進行 **網頁搜尋**。
-    * *(無前綴)* : 綜合搜尋 (已開啟分頁 + 書籤 + 網頁)。
+#### 從 Firefox 附加元件商店 (推薦)
+1.  前往 [Firefox 附加元件商店](https://addons.mozilla.org/firefox/addon/spotlight-hybrid/) (連結佔位)。
+2.  點擊 **「新增至 Firefox」**。
 
-### 設定頁面
-在 Spotlight Settings 頁面中，您可以：
-* 自訂分頁、書籤、歷史紀錄與搜尋模式的觸發前綴與 **標籤顏色**。
-* 新增自訂搜尋引擎：設定前綴、名稱、包含 `%s` 佔位符的搜尋網址，以及選擇 **專屬顏色**。
-
-### 安裝教學 (開發者模式)
-
-目前此套件尚未上架至 Firefox Add-ons 商店，你可以透過以下方式安裝試用：
-
-1.  打開 Firefox，在網址列輸入 `about:debugging` 並進入。
-2.  點擊左側選單的 **"This Firefox"**。
-3.  點擊 **"Load Temporary Add-on..." (載入暫時的附加元件)** 按鈕。
+#### 開發者模式 (手動安裝)
+1.  下載此專案並解壓縮。
+2.  打開 Firefox，在網址列輸入 `about:debugging`。
+3.  點擊左側 **「This Firefox」** -> **「載入暫時的附加元件...」**。
 4.  選擇專案資料夾中的 `manifest.json` 檔案。
-5.  完成！現在你可以開始使用 Spotlight 功能了。
 
-### 權限說明
+### 操作說明
 
-本套件需要 `<all_urls>` 權限以便將搜尋介面 (Overlay) 注入至您瀏覽的網頁中。我們重視您的隱私，不會收集任何個人數據。
+* **`Enter`**：在當前分頁開啟或切換。
+* **`Shift + Enter`**：在新聞分頁開啟。
+* **`方向鍵 上/下`**：選擇搜尋結果。
+* **`Esc`**：關閉搜尋面板。
+
+### 隱私與權限說明
+
+本套件需要 `<all_urls>` 權限以便將搜尋介面注入至網頁中。我們承諾不會收集、儲存或傳送任何您的瀏覽紀錄、搜尋字串或個人資料。
