@@ -44,7 +44,18 @@
 
 ### Privacy & Permissions
 
-This extension requires `<all_urls>` permission to provide the Overlay UI on any website you browse. We do not collect, store, or transmit any browsing data, search queries, or personal information.
+This extension is built with a "Privacy-First" philosophy. We do not collect, track, or sell your data.
+1. Data Collection & Processing
+    * No Tracking: We do not collect your browsing history, search queries, or personal information.
+    * Local Execution: All search operations (Tabs, Bookmarks, and History) are performed locally on your device using Firefox's native APIs.
+    * Zero Telemetry: No analytics or tracking scripts are included in this extension.
+2. Justification for Permissions
+    * <all_urls> & scripting: Required to inject the floating search interface (Overlay) onto the web pages you visit, allowing you to use the tool without leaving your current tab.
+    * tabs: Needed to search and switch between your currently open tabs.
+    * bookmarks & history: Required to provide instant search results from your saved bookmarks and browsing history.
+    * storage: Used exclusively to save your custom settings, such as search prefixes and badge colors.
+3. Data Storage
+    * Your preferences are stored using browser.storage.sync, which may sync your settings across your Firefox account but never leaves the Firefox ecosystem.
 
 ---
 
@@ -88,4 +99,15 @@ This extension requires `<all_urls>` permission to provide the Overlay UI on any
 
 ### 隱私與權限說明
 
-本套件需要 `<all_urls>` 權限以便將搜尋介面注入至網頁中。我們承諾不會收集、儲存或傳送任何您的瀏覽紀錄、搜尋字串或個人資料。
+本套件基於「隱私至上」的原則開發。我們不會收集、追蹤或販售您的個人資料。
+1. 資料收集與處理
+    * 無追蹤行為：我們不會收集您的瀏覽紀錄、搜尋關鍵字或個人資訊。
+    * 本地端執行：所有的搜尋功能（分頁、書籤與歷史紀錄）皆透過 Firefox 原生 API 在您的裝置上本地執行。
+    * 無遙測數據：本套件不包含任何分析工具或追蹤腳本。
+2. 權限使用說明
+    * <all_urls> 與 scripting：用於將浮動搜尋介面 (Overlay) 注入至您瀏覽的網頁中，讓您無需離開當前分頁即可操作。
+    * tabs (分頁)：用於搜尋並快速切換至您已開啟的分頁。
+    * bookmarks (書籤) 與 history (歷史紀錄)：用於即時檢索您儲存的書籤與瀏覽紀錄。
+    * storage (儲存)：僅用於儲存您的自訂設定，例如搜尋前綴與標籤顏色。
+3. 資料儲存
+    * 您的設定會透過 browser.storage.sync 進行儲存，這僅會在您的 Firefox 帳號間同步設定，資料絕不會流向任何第三方伺服器。
