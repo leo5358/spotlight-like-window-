@@ -1,5 +1,5 @@
 {
-    "extName": { "message": "Firefox Spotlight Hybrid" },
+    "extName": { "message": "Spotlight Hybrid" },
     "extDesc": { "message": "Floating overlay on web pages, popup window on system pages." },
     "cmdToggle": { "message": "Toggle Spotlight" },
     
@@ -30,7 +30,7 @@
     "msgKeysStep1": { "message": "Go to about:addons" },
     "msgKeysStep2": { "message": "Click the ⚙️ (Gear icon) at the top right." },
     "msgKeysStep3": { "message": "Select \"Manage Extension Shortcuts\"." },
-    "msgKeysStep4": { "message": "Find \"Firefox Spotlight Hybrid\" and set your key." },
+    "msgKeysStep4": { "message": "Find \"Spotlight Hybrid\" and set your key." },
   
     "phDefault": { "message": "Search or type a URL…" },
     "phTabs": { "message": "Search open tabs…" },
