@@ -1,4 +1,4 @@
-# Firefox Spotlight Hybrid
+# Spotlight Hybrid
 
 [English](#english) | [繁體中文](#traditional-chinese)
 
