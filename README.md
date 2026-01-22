@@ -93,7 +93,7 @@ This extension is built with a "Privacy-First" philosophy. We do not collect, tr
 ### 操作說明
 
 * **`Enter`**：在當前分頁開啟或切換。
-* **`Shift + Enter`**：在新聞分頁開啟。
+* **`Shift + Enter`**：在新分頁開啟。
 * **`方向鍵 上/下`**：選擇搜尋結果。
 * **`Esc`**：關閉搜尋面板。
 
